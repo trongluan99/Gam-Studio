@@ -11,8 +11,8 @@
     <com.ads.gam.widget.spinkit.SpinKitView
         android:id="@+id/spin_kit"
         style="@style/SpinKitView.Circle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/_32sdp"
+        android:layout_height="@dimen/_32sdp"
         app:SpinKit_Color="#2F53FF" />
 
 
@@ -21,8 +21,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_10sdp"
-        android:alpha="0.7"
+        android:alpha="0.8"
         android:text="@string/loading_ads"
         android:textColor="#000000"
-        android:textSize="@dimen/_18sdp" />
+        android:textSize="@dimen/_14sdp" />
 </LinearLayout>
