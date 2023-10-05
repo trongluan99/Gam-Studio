@@ -11,7 +11,7 @@
 
 ~~~
     maven { url 'https://jitpack.io' }
-    implementation 'com.github.trongluan99:Gam-Studio:1.0.0'
+    implementation 'com.github.trongluan99:Gam-Studio:1.0'
     implementation 'com.google.android.play:core:1.10.3'
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
     implementation 'com.google.android.gms:play-services-ads:21.4.0'
