@@ -9,7 +9,7 @@ android {
 
 
     defaultConfig {
-        applicationId "com.gam.module.ads"
+        applicationId "com.gam.module"
         minSdkVersion 24
         targetSdkVersion 33
         versionCode 1

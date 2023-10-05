@@ -1,4 +1,4 @@
-package com.ads.control.dialog;
+package com.ads.gam.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.ads.control.Purchase;
-import com.ads.control.R;
+import com.ads.gam.Purchase;
+import com.ads.gam.R;
 
 
 public class InAppDialog extends Dialog {

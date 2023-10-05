@@ -1,4 +1,4 @@
-package com.ads.control.funtion;
+package com.ads.gam.funtion;
 
 import android.app.Activity;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.ads.control.dialog;
+package com.ads.gam.dialog;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.ads.control.Admod;
-import com.ads.control.R;
+import com.ads.gam.Admod;
+import com.ads.gam.R;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.ads.formats.UnifiedNativeAd;
 import com.google.android.gms.ads.formats.UnifiedNativeAdView;

@@ -1,4 +1,4 @@
-package com.ads.control.funtion;
+package com.ads.gam.funtion;
 
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.formats.UnifiedNativeAd;

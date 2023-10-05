@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gntGreen"
-    tools:context="com.gam.module.ads.fragment.BlankFragment">
+    tools:context="com.gam.module.fragment.BlankFragment">
 
     <include layout="@layout/layout_native_control" />
     <Button

@@ -64,7 +64,7 @@
                         android:textStyle="bold" />
 
                 </LinearLayout>
-                <com.ads.control.util.CustomRatingBar
+                <com.ads.gam.util.CustomRatingBar
                     android:id="@+id/ad_stars"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

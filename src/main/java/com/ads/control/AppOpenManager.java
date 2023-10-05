@@ -1,4 +1,4 @@
-package com.ads.control;
+package com.ads.gam;
 
 import android.app.Activity;
 import android.app.Application;
@@ -20,7 +20,7 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
-import com.ads.control.dialog.PrepareLoadingAdsDialog;
+import com.ads.gam.dialog.PrepareLoadingAdsDialog;
 import com.google.android.gms.ads.AdActivity;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;

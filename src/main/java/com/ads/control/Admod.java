@@ -1,4 +1,4 @@
-package com.ads.control;
+package com.ads.gam;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -26,9 +26,9 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
-import com.ads.control.dialog.PrepareLoadingAdsDialog;
-import com.ads.control.funtion.AdCallback;
-import com.ads.control.funtion.AdmodHelper;
+import com.ads.gam.dialog.PrepareLoadingAdsDialog;
+import com.ads.gam.funtion.AdCallback;
+import com.ads.gam.funtion.AdmodHelper;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.ads.mediation.facebook.FacebookAdapter;
 import com.google.ads.mediation.facebook.FacebookExtras;

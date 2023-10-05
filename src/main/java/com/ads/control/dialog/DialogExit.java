@@ -1,4 +1,4 @@
-package com.ads.control.dialog;
+package com.ads.gam.dialog;
 
 import android.content.Context;
 import android.view.Gravity;

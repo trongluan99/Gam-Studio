@@ -1,4 +1,4 @@
-package com.ads.control;
+package com.ads.gam;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -10,8 +10,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.ads.control.funtion.AdmodHelper;
-import com.ads.control.funtion.PurchaseListioner;
+import com.ads.gam.funtion.AdmodHelper;
+import com.ads.gam.funtion.PurchaseListioner;
 import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.SkuDetails;
 import com.anjlab.android.iab.v3.TransactionDetails;

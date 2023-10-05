@@ -1,4 +1,4 @@
-package com.ads.control;
+package com.ads.gam;
 
 import androidx.multidex.MultiDexApplication;
 

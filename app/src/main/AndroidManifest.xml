@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.gam.module.ads">
+    package="com.gam.module">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-        android:name="com.gam.module.ads.MyApplication"
+        android:name="com.gam.module.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -15,14 +15,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndModuleAds">
         <activity
-            android:name="com.gam.module.ads.activity.SimpleListActivity"
+            android:name="com.gam.module.activity.SimpleListActivity"
             android:exported="true">
 
         </activity>
-        <activity android:name="com.gam.module.ads.activity.ContentActivity" />
-        <activity android:name="com.gam.module.ads.activity.MainActivity" />
+        <activity android:name="com.gam.module.activity.ContentActivity" />
+        <activity android:name="com.gam.module.activity.MainActivity" />
 
-        <activity android:name="com.gam.module.ads.activity.SplashActivity"
+        <activity android:name="com.gam.module.activity.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
