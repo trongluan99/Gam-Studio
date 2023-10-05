@@ -132,7 +132,7 @@ class App extends AdsMultiDexApplication(){
         Admob.getInstance().setDisableAdResumeWhenClickAds(true);
         // If true -> onNextAction() is called right after Ad Interstitial showed
         Admob.getInstance().setOpenActivityAfterShowInterAds(true);
-    AppOpenManager.getInstance().disableAppResumeWithActivity(SplashActivity.class);
+        AppOpenManager.getInstance().disableAppResumeWithActivity(SplashActivity.class);
     }
 }
 ~~~
@@ -164,12 +164,12 @@ SplashActivity
 ~~~
 
 ~~~
-        GamAd.getInstance().setInitCallback(new GamInitCallback() {
+    GamAd.getInstance().setInitCallback(new GamInitCallback() {
             @Override
             public void initAdSuccess() {
                 GamAd.getInstance().loadSplashInterstitialAds(SplashActivity.this, idAdSplash, TIME_OUT, TIME_DELAY_SHOW_AD, true, adCallback);
             }
-        });
+        });    
 ~~~
 
 SplashActivity
@@ -195,15 +195,15 @@ Load ad interstitial before show
 Check null when Load Inter
 
 ~~~
-  private fun loadInterCreate() {
-    ApInterstitialAd mInterstitialAd = GamAd.getInstance().getInterstitialAds(this, idInter);
-  }
+    private fun loadInterCreate() {
+      ApInterstitialAd mInterstitialAd = GamAd.getInstance().getInterstitialAds(this, idInter);
+    }
 ~~~
 
 Show and auto release ad interstitial
 
 ~~~
-         if (mInterstitialAd.isReady()) {
+    if (mInterstitialAd.isReady()) {
                 GamAd.getInstance().forceShowInterstitial(this, mInterstitialAd, new GamAdCallback() {
             @Override
             public void onNextAction() {
@@ -240,13 +240,13 @@ call load ad banner
 #### The older way:
 
 ~~~
-  <include
-  android:id="@+id/include"
-  layout="@layout/layout_banner_control"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:layout_alignParentBottom="true"
-  app:layout_constraintBottom_toBottomOf="parent" />
+    <include
+    android:id="@+id/include"
+    layout="@layout/layout_banner_control"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    app:layout_constraintBottom_toBottomOf="parent" />
 ~~~
 
 call load ad banner
@@ -260,13 +260,13 @@ call load ad banner
 Load ad native before show
 
 ~~~~
-        GamAd.getInstance().loadNativeAdResultCallback(this,ID_NATIVE_AD, com.ads.control.R.layout.custom_native_max_small,new GamAdCallback(){
+    GamAd.getInstance().loadNativeAdResultCallback(this,ID_NATIVE_AD, com.ads.control.R.layout.custom_native_max_small,new GamAdCallback(){
             @Override
             public void onNativeAdLoaded(@NonNull ApNativeAd nativeAd) {
                 super.onNativeAdLoaded(nativeAd);
                //save or show native 
             }
-        });
+        });    
 ~~~~
 
 Populate native ad to view
@@ -280,7 +280,7 @@ auto load and show native contains loading
 in layout XML
 
 ~~~~
-      <com.ads.control.ads.nativeAds.GamNativeAdView
+    <com.ads.control.ads.nativeAds.GamNativeAdView
         android:id="@+id/GamNativeAds"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_150sdp"
@@ -330,7 +330,7 @@ App
     override fun onCreate() {
       super.onCreate()
       AppOpenManager.getInstance().enableAppResume()
-      GamAdConfig.setIdAdResume(AppOpenManager.AD_UNIT_ID_TEST);
+      gamAdConfig.setIdAdResume(AppOpenManager.AD_UNIT_ID_TEST);
       ...
     }
 ~~~~
@@ -378,7 +378,7 @@ Application
 
 ## Purchase Listener
 
-             AppPurchase.getInstance().setPurchaseListioner(new PurchaseListioner() {
+     AppPurchase.getInstance().setPurchaseListioner(new PurchaseListioner() {
                  @Override
                  public void onProductPurchased(String productId,String transactionDetails) {
 
@@ -388,7 +388,7 @@ Application
                  public void displayErrorMessage(String errorMsg) {
 
                  }
-             });
+             });        
 
 ## Get id purchased
 
