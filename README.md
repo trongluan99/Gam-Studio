@@ -104,29 +104,29 @@ class App extends AdsMultiDexApplication(){
         super.onCreate();
     ...
         String environment = BuildConfig.build_debug ? GamAdConfig.ENVIRONMENT_DEVELOP : GamAdConfig.ENVIRONMENT_PRODUCTION;
-        GamAdConfig = new GamAdConfig(this, GamAdConfig.PROVIDER_ADMOB, environment);
+        gamAdConfig = new GamAdConfig(this, GamAdConfig.PROVIDER_ADMOB, environment);
 
         // Optional: setup Adjust event
         AdjustConfig adjustConfig = new AdjustConfig(true,ADJUST_TOKEN);
         // adjustConfig.setEventAdImpression(EVENT_AD_IMPRESSION_ADJUST);
         // adjustConfig.setEventNamePurchase(EVENT_PURCHASE_ADJUST);
-        GamAdConfig.setAdjustConfig(adjustConfig);
+        gamAdConfig.setAdjustConfig(adjustConfig);
 
         // Optional: setup Appsflyer event
         AppsflyerConfig appsflyerConfig = new AppsflyerConfig(true,APPSFLYER_TOKEN);
-        GamAdConfig.setAppsflyerConfig(appsflyerConfig);
+        gamAdConfig.setAppsflyerConfig(appsflyerConfig);
     
         // Optional: setup client token SDK Facebook
-        GamAdConfig.setFacebookClientToken(FACEBOOK_CLIENT_TOKEN)
+        gamAdConfig.setFacebookClientToken(FACEBOOK_CLIENT_TOKEN)
 
         // Optional: enable ads resume
-        GamAdConfig.setIdAdResume(BuildConfig.ads_open_app);
+        gamAdConfig.setIdAdResume(BuildConfig.ads_open_app);
 
         // Optional: setup list device test - recommended to use
         listTestDevice.add(DEVICE_ID_TEST);
-        GamAdConfig.setListDeviceTest(listTestDevice);
+        gamAdConfig.setListDeviceTest(listTestDevice);
 
-        GamAd.getInstance().init(this, GamAdConfig, false);
+        GamAd.getInstance().init(this, gamAdConfig, false);
 
         // Auto disable ad resume after user click ads and back to app
         Admob.getInstance().setDisableAdResumeWhenClickAds(true);
