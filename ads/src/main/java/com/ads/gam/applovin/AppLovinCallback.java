@@ -9,12 +9,10 @@ import com.applovin.mediation.nativeAds.MaxNativeAdView;
 
 public class AppLovinCallback {
     public void initAppLovinSuccess() {
-
     }
 
     public void onAdClosed() {
     }
-
 
     public void onAdFailedToLoad(@Nullable MaxError i) {
     }
@@ -25,12 +23,10 @@ public class AppLovinCallback {
     public void onAdLeftApplication() {
     }
 
-
     public void onAdLoaded() {
     }
 
     public void onInterstitialLoad(MaxInterstitialAd interstitialAd) {
-
     }
 
     public void onAdClicked() {
@@ -44,8 +40,18 @@ public class AppLovinCallback {
     public void onAdSplashReady() {
     }
 
-
     public void onUnifiedNativeAdLoaded(MaxNativeAdView unifiedNativeAd) {
+    }
 
+    public void onNextAction() {
+    }
+
+    public void onAdDisplayed() {
+    }
+
+    public void onAdLoadFailed() {
+    }
+
+    public void onAdDisplayFailed() {
     }
 }
