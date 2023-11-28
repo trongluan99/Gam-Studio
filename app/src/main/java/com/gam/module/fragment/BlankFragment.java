@@ -15,8 +15,8 @@ import com.ads.gam.admob.Admob;
 import com.ads.gam.ads.GamAd;
 import com.ads.gam.config.GamAdConfig;
 import com.ads.gam.funtion.AdCallback;
-import com.gam.module.R;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.gam.module.R;
 import com.gam.module.activity.ContentActivity;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 
@@ -56,7 +56,7 @@ public class BlankFragment extends Fragment {
             public void onAdClicked() {
                 super.onAdClicked();
             }
-        });
+        }, null);
 
         button.setOnClickListener(v -> {
             Admob.getInstance().forceShowInterstitial(getActivity(), mInterstitialAd, new AdCallback() {
@@ -69,6 +69,6 @@ public class BlankFragment extends Fragment {
 
         FrameLayout flPlaceHolder = view.findViewById(R.id.fl_adplaceholder);
         ShimmerFrameLayout shimmerFrameLayout = view.findViewById(R.id.shimmer_container_native);
-        GamAd.getInstance().loadNativeAd(requireActivity(), getString(R.string.admod_native_id), com.ads.gam.R.layout.custom_native_admob_free_size, flPlaceHolder, shimmerFrameLayout);
+        GamAd.getInstance().loadNativeAd(requireActivity(), getString(R.string.admod_native_id), com.ads.gam.R.layout.custom_native_admob_free_size, flPlaceHolder, shimmerFrameLayout, null);
     }
 }

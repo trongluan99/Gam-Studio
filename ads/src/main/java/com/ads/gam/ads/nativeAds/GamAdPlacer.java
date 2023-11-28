@@ -106,7 +106,7 @@ public class GamAdPlacer {
                             super.onAdImpression();
                             GamAdPlacer.this.onAdImpression();
                         }
-                    });
+                    }, null);
                 });
             }
         } else {
@@ -145,7 +145,7 @@ public class GamAdPlacer {
                 Log.i(TAG, "native ad in recycle loaded: " + countLoadAd);
                 countLoadAd++;
             }
-        }, Math.min(listAd.size(), settings.getPositionFixAd()));
+        }, Math.min(listAd.size(), settings.getPositionFixAd()), null);
     }
 
     public boolean isAdPosition(int pos) {

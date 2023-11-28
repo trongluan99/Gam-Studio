@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.adjust.sdk.Adjust;
+import com.adjust.sdk.AdjustEvent;
 import com.ads.gam.config.GamAdConfig;
 import com.ads.gam.funtion.AdType;
 import com.ads.gam.util.AppUtil;
@@ -27,6 +29,14 @@ public class GamLogEventManager {
         // Log revenue Facebook 30/08
         float value = adValue.getValueMicros() * 1.0f / 1000000 * 24000;
         AppEventsLogger.newLogger(context).logPurchase(BigDecimal.valueOf(value), Currency.getInstance("VND"));
+    }
+
+    public static void logPaidAdjustWithToken(AdValue adValue, String adUnitId, String token) {
+        AdjustEvent adjustEvent = new AdjustEvent(token);
+        float value = adValue.getValueMicros() * 1.0f / 1000000;
+        adjustEvent.setRevenue(value, "USD");
+        adjustEvent.setOrderId(adUnitId);
+        Adjust.trackEvent(adjustEvent);
     }
 
     public static void logPaidAdImpression(Context context, MaxAd adValue, AdType adType) {

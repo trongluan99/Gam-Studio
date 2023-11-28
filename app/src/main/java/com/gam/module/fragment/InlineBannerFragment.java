@@ -50,6 +50,6 @@ public class InlineBannerFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Admob.getInstance().loadBannerFragment(requireActivity(),getString(R.string.admod_banner_id),view,true);
+        Admob.getInstance().loadBannerFragment(requireActivity(),getString(R.string.admod_banner_id),view,true, null);
     }
 }
