@@ -111,6 +111,7 @@ class App extends AdsMultiDexApplication(){
         // adjustConfig.setEventAdImpression(EVENT_AD_IMPRESSION_ADJUST);
         // adjustConfig.setEventNamePurchase(EVENT_PURCHASE_ADJUST);
         gamAdConfig.setAdjustConfig(adjustConfig);
+        gamAdConfig.setAdjustTokenTiktok("123545");
 
         // Optional: setup Appsflyer event
         AppsflyerConfig appsflyerConfig = new AppsflyerConfig(true,APPSFLYER_TOKEN);
