@@ -56,7 +56,7 @@ public class BlankFragment extends Fragment {
             public void onAdClicked() {
                 super.onAdClicked();
             }
-        }, null);
+        });
 
         button.setOnClickListener(v -> {
             Admob.getInstance().forceShowInterstitial(getActivity(), mInterstitialAd, new AdCallback() {

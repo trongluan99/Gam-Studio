@@ -52,8 +52,8 @@ public class MyApplication extends AdsMultiDexApplication {
         adjustConfig.setEventAdImpression(EVENT_AD_IMPRESSION_ADJUST);
         adjustConfig.setEventNamePurchase(EVENT_PURCHASE_ADJUST);
         gamAdConfig.setAdjustConfig(adjustConfig);
+        gamAdConfig.setAdjustTokenTiktok("123545");
 
-        AppsflyerConfig appsflyerConfig = new AppsflyerConfig(true,APPSFLYER_TOKEN);
 
         gamAdConfig.setIdAdResume(BuildConfig.ads_open_app);
 

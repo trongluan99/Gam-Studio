@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             public void onAdImpression() {
                 super.onAdImpression();
             }
-        }, null);
+        });
 
 
         AppPurchase.getInstance().setPurchaseListener(new PurchaseListener() {
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             public void onAdImpression() {
                 super.onAdImpression();
             }
-        }, null);
+        });
         loadAdInterstitial();
 
         findViewById(R.id.btShowAds).setOnClickListener(v -> {
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onInterstitialShow() {
                         super.onInterstitialShow();
                     }
-                }, true, null);
+                }, true);
             } else {
                 loadAdInterstitial();
             }
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onInterstitialShow() {
                         super.onInterstitialShow();
                     }
-                }, true, null);
+                }, true);
             } else {
                 loadAdInterstitial();
             }
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.btnShowReward).setOnClickListener(v -> {
             if (rewardAd != null && rewardAd.isReady()) {
-                GamAd.getInstance().forceShowRewardAd(this, rewardAd, new GamAdCallback(), null);
+                GamAd.getInstance().forceShowRewardAd(this, rewardAd, new GamAdCallback());
                 return;
             }
             rewardAd = GamAd.getInstance().getRewardAd(this, BuildConfig.ad_reward, null);

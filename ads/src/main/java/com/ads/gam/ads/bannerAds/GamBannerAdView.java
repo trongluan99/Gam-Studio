@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ads.gam.R;
-import com.ads.gam.admob.Admob;
 import com.ads.gam.ads.GamAd;
 import com.ads.gam.ads.GamAdCallback;
 import com.ads.gam.funtion.AdCallback;
@@ -47,35 +46,35 @@ public class GamBannerAdView extends RelativeLayout {
         inflate(getContext(), R.layout.layout_banner_control, this);
     }
 
-    public void loadBanner(Activity activity, String idBanner,String tokenAdjust) {
-        loadBanner(activity, idBanner, new GamAdCallback(), tokenAdjust);
+    public void loadBanner(Activity activity, String idBanner) {
+        loadBanner(activity, idBanner, new GamAdCallback());
     }
 
-    public void loadBanner(Activity activity, String idBanner, GamAdCallback GamAdCallback, String tokenAdjust) {
-        GamAd.getInstance().loadBanner(activity, idBanner, GamAdCallback, tokenAdjust);
+    public void loadBanner(Activity activity, String idBanner, GamAdCallback GamAdCallback) {
+        GamAd.getInstance().loadBanner(activity, idBanner, GamAdCallback);
     }
 
-    public void loadInlineBanner(Activity activity, String idBanner, String inlineStyle, String tokenAdjust) {
-        Admob.getInstance().loadInlineBanner(activity, idBanner, inlineStyle, tokenAdjust);
+    public void loadInlineBanner(Activity activity, String idBanner, String inlineStyle) {
+        GamAd.getInstance().loadInlineBanner(activity, idBanner, inlineStyle);
     }
 
-    public void loadInlineBanner(Activity activity, String idBanner, String inlineStyle, AdCallback adCallback, String tokenAdjust) {
-        Admob.getInstance().loadInlineBanner(activity, idBanner, inlineStyle, adCallback, tokenAdjust);
+    public void loadInlineBanner(Activity activity, String idBanner, String inlineStyle, AdCallback adCallback) {
+        GamAd.getInstance().loadInlineBanner(activity, idBanner, inlineStyle, adCallback);
     }
 
-    public void loadBannerFragment(Activity activity, String idBanner, String tokenAdjust) {
-        GamAd.getInstance().loadBannerFragment(activity, idBanner, getRootView(), tokenAdjust);
+    public void loadBannerFragment(Activity activity, String idBanner) {
+        GamAd.getInstance().loadBannerFragment(activity, idBanner, getRootView());
     }
 
-    public void loadBannerFragment(Activity activity, String idBanner, AdCallback adCallback, String tokenAdjust) {
-        GamAd.getInstance().loadBannerFragment(activity, idBanner, getRootView(), adCallback, tokenAdjust);
+    public void loadBannerFragment(Activity activity, String idBanner, AdCallback adCallback) {
+        GamAd.getInstance().loadBannerFragment(activity, idBanner, getRootView(), adCallback);
     }
 
-    public void loadInlineBannerFragment(Activity activity, String idBanner, String inlineStyle, String tokenAdjust) {
-        Admob.getInstance().loadInlineBannerFragment(activity, idBanner, getRootView(), inlineStyle, tokenAdjust);
+    public void loadInlineBannerFragment(Activity activity, String idBanner, String inlineStyle) {
+        GamAd.getInstance().loadBannerInlineFragment(activity, idBanner, getRootView(), inlineStyle);
     }
 
-    public void loadInlineBannerFragment(Activity activity, String idBanner, String inlineStyle, AdCallback adCallback, String tokenAdjust) {
-        Admob.getInstance().loadInlineBannerFragment(activity, idBanner, getRootView(), inlineStyle, adCallback, tokenAdjust);
+    public void loadInlineBannerFragment(Activity activity, String idBanner, String inlineStyle, AdCallback adCallback) {
+        GamAd.getInstance().loadBannerInlineFragment(activity, idBanner, getRootView(), inlineStyle, adCallback);
     }
 }

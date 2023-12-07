@@ -11,11 +11,11 @@ public class GamAdConfig {
     public static final int PROVIDER_ADMOB = 0;
     public static final int PROVIDER_MAX = 1;
 
-
     public static final String ENVIRONMENT_DEVELOP = "develop";
     public static final String ENVIRONMENT_PRODUCTION = "production";
 
     public static final String DEFAULT_TOKEN_FACEBOOK_SDK = "client_token";
+    public static String ADJUST_TOKEN_TIKTOK = "client_token_adjust_tiktok";
 
     /**
      * config ad mediation using for app
@@ -44,6 +44,8 @@ public class GamAdConfig {
     private boolean enableAdResume = false;
     private String facebookClientToken = DEFAULT_TOKEN_FACEBOOK_SDK;
 
+    private String adjustTokenTiktok;
+
     /**
      * intervalInterstitialAd: time between two interstitial ad impressions
      * unit: seconds
@@ -66,7 +68,6 @@ public class GamAdConfig {
     }
 
     /**
-     *
      * @param isVariantDev
      */
     @Deprecated
@@ -161,5 +162,14 @@ public class GamAdConfig {
 
     public String getFacebookClientToken() {
         return this.facebookClientToken;
+    }
+
+    public String getAdjustTokenTiktok() {
+        return adjustTokenTiktok;
+    }
+
+    public void setAdjustTokenTiktok(String adjustTokenTiktok) {
+        ADJUST_TOKEN_TIKTOK = adjustTokenTiktok;
+        this.adjustTokenTiktok = adjustTokenTiktok;
     }
 }
