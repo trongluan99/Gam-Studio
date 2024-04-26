@@ -12,9 +12,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ads.gam.R;
 import com.ads.gam.admob.Admob;
+import com.ads.gam.ads.GamAd;
 import com.ads.gam.ads.wrapper.ApAdValue;
 import com.ads.gam.ads.wrapper.ApNativeAd;
 import com.ads.gam.ads.wrapper.StatusAd;
+import com.ads.gam.config.GamAdConfig;
 import com.ads.gam.funtion.AdCallback;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.ads.AdValue;
@@ -106,7 +108,7 @@ public class GamAdPlacer {
                             super.onAdImpression();
                             GamAdPlacer.this.onAdImpression();
                         }
-                    }, null);
+                    }, GamAdConfig.ADJUST_TOKEN_TIKTOK);
                 });
             }
         } else {
@@ -145,7 +147,7 @@ public class GamAdPlacer {
                 Log.i(TAG, "native ad in recycle loaded: " + countLoadAd);
                 countLoadAd++;
             }
-        }, Math.min(listAd.size(), settings.getPositionFixAd()), null);
+        }, Math.min(listAd.size(), settings.getPositionFixAd()), GamAdConfig.ADJUST_TOKEN_TIKTOK);
     }
 
     public boolean isAdPosition(int pos) {

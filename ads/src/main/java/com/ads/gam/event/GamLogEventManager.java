@@ -27,7 +27,7 @@ public class GamLogEventManager {
         GamAdjust.pushTrackEventAdmob(adValue);
         GamAppsflyer.getInstance().pushTrackEventAdmob(adValue, adUnitId, adType);
         // Log revenue Facebook 30/08
-        float value = adValue.getValueMicros() * 1.0f / 1000000 * 24000;
+        float value = adValue.getValueMicros() * 1.0f / 1000000;
         AppEventsLogger.newLogger(context).logPurchase(BigDecimal.valueOf(value), Currency.getInstance("VND"));
     }
 
@@ -43,6 +43,10 @@ public class GamLogEventManager {
         logEventWithMaxAds(context, adValue);
         GamAdjust.pushTrackEventApplovin(adValue, context);
         GamAppsflyer.getInstance().pushTrackEventApplovin(adValue, adType);
+
+        // Log revenue Facebook 26/04/2024
+        double value = adValue.getRevenue();
+        AppEventsLogger.newLogger(context).logPurchase(BigDecimal.valueOf(value), Currency.getInstance("USD"));
     }
 
     private static void logEventWithMaxAds(Context context, MaxAd impressionData) {
