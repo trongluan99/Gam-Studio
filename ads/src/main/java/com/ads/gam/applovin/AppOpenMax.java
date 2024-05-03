@@ -21,6 +21,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.ads.gam.ads.GamAdCallback;
 import com.ads.gam.ads.wrapper.ApAdError;
 import com.ads.gam.billing.AppPurchase;
+import com.ads.gam.config.GamAdConfig;
 import com.ads.gam.dialog.ResumeLoadingDialog;
 import com.ads.gam.event.GamLogEventManager;
 import com.ads.gam.funtion.AdType;
@@ -423,6 +424,7 @@ public class AppOpenMax implements Application.ActivityLifecycleCallbacks, Lifec
                 @Override
                 public void onAdRevenuePaid(MaxAd maxAd) {
                     GamLogEventManager.logPaidAdImpression(context, maxAd, AdType.APP_OPEN);
+                    GamLogEventManager.logPaidAdjustWithTokenMax(maxAd, maxAd.getAdUnitId(), GamAdConfig.ADJUST_TOKEN_TIKTOK);
                 }
             });
             openAdSplash.showAd();

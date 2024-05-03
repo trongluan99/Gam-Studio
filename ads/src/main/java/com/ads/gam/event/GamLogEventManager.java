@@ -39,6 +39,14 @@ public class GamLogEventManager {
         Adjust.trackEvent(adjustEvent);
     }
 
+    public static void logPaidAdjustWithTokenMax(MaxAd adValue, String adUnitId, String token) {
+        AdjustEvent adjustEvent = new AdjustEvent(token);
+        double value = adValue.getRevenue();
+        adjustEvent.setRevenue(value, "USD");
+        adjustEvent.setOrderId(adUnitId);
+        Adjust.trackEvent(adjustEvent);
+    }
+
     public static void logPaidAdImpression(Context context, MaxAd adValue, AdType adType) {
         logEventWithMaxAds(context, adValue);
         GamAdjust.pushTrackEventApplovin(adValue, context);

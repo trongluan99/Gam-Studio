@@ -19,8 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ads.gam.R;
 import com.ads.gam.billing.AppPurchase;
 import com.ads.gam.dialog.PrepareLoadingAdsDialog;
-import com.ads.gam.funtion.AdCallback;
 import com.ads.gam.event.GamLogEventManager;
+import com.ads.gam.funtion.AdCallback;
 import com.ads.gam.funtion.AdType;
 import com.ads.gam.util.SharePreferenceUtils;
 import com.applovin.mediation.MaxAd;
@@ -147,7 +147,7 @@ public class AppLovin {
      * @param timeDelay  : thời gian chờ show ad từ lúc load ads
      * @param adListener
      */
-    public void loadSplashInterstitialAds(final Context context, String id, long timeOut, long timeDelay, AppLovinCallback adListener) {
+    public void loadSplashInterstitialAds(final Context context, String id, long timeOut, long timeDelay, AppLovinCallback adListener, String tokenAdjust) {
         isTimeDelay = false;
         isTimeout = false;
         Log.i(TAG, "loadSplashInterstitialAds  start time loading:"
@@ -166,7 +166,7 @@ public class AppLovin {
             //check delay show ad splash
             if (interstitialSplash != null && interstitialSplash.isReady()) {
                 Log.i(TAG, "loadSplashInterstitialAds:show ad on delay ");
-                onShowSplash((Activity) context, adListener);
+                onShowSplash((Activity) context, adListener, tokenAdjust);
                 return;
             }
             Log.i(TAG, "loadSplashInterstitialAds: delay validate");
@@ -180,7 +180,7 @@ public class AppLovin {
                 isTimeout = true;
                 if (interstitialSplash != null && interstitialSplash.isReady()) {
                     Log.i(TAG, "loadSplashInterstitialAds:show ad on timeout ");
-                    onShowSplash((Activity) context, adListener);
+                    onShowSplash((Activity) context, adListener, tokenAdjust);
                     return;
                 }
                 if (adListener != null) {
@@ -202,7 +202,7 @@ public class AppLovin {
                 if (isTimeout)
                     return;
                 if (isTimeDelay) {
-                    onShowSplash((Activity) context, adListener);
+                    onShowSplash((Activity) context, adListener, tokenAdjust);
                     Log.i(TAG, "loadSplashInterstitialAds: show ad on loaded ");
                 }
             }
@@ -255,7 +255,7 @@ public class AppLovin {
      * @param timeDelay  : thời gian chờ show ad từ lúc load ads
      * @param adListener
      */
-    public void loadSplashInterstitialAds(final Context context, String id, long timeOut, long timeDelay, boolean showSplashIfReady, AppLovinCallback adListener) {
+    public void loadSplashInterstitialAds(final Context context, String id, long timeOut, long timeDelay, boolean showSplashIfReady, AppLovinCallback adListener, String tokenAdjust) {
         isTimeDelay = false;
         isTimeout = false;
         Log.i(TAG, "loadSplashInterstitialAds  start time loading:"
@@ -275,7 +275,7 @@ public class AppLovin {
             if (interstitialSplash != null && interstitialSplash.isReady()) {
                 Log.i(TAG, "loadSplashInterstitialAds:show ad on delay ");
                 if (showSplashIfReady)
-                    onShowSplash((Activity) context, adListener);
+                    onShowSplash((Activity) context, adListener, tokenAdjust);
                 else
                     adListener.onAdSplashReady();
                 return;
@@ -292,7 +292,7 @@ public class AppLovin {
                 if (interstitialSplash != null && interstitialSplash.isReady()) {
                     Log.i(TAG, "loadSplashInterstitialAds:show ad on timeout ");
                     if (showSplashIfReady)
-                        onShowSplash((Activity) context, adListener);
+                        onShowSplash((Activity) context, adListener, tokenAdjust);
                     else
                         adListener.onAdSplashReady();
 
@@ -318,7 +318,7 @@ public class AppLovin {
                     return;
                 if (isTimeDelay) {
                     if (showSplashIfReady)
-                        onShowSplash((Activity) context, adListener);
+                        onShowSplash((Activity) context, adListener, tokenAdjust);
                     else
                         adListener.onAdSplashReady();
                     Log.i(TAG, "loadSplashInterstitialAds: show ad on loaded ");
@@ -366,7 +366,7 @@ public class AppLovin {
         });
     }
 
-    public void onShowSplash(Activity activity, AppLovinCallback adListener) {
+    public void onShowSplash(Activity activity, AppLovinCallback adListener, String tokenAdjust) {
         isShowLoadingSplash = true;
         Log.d(TAG, "onShowSplash: ");
         if (handlerTimeout != null && rdTimeout != null) {
@@ -380,7 +380,12 @@ public class AppLovin {
             adListener.onAdClosed();
             return;
         }
-        interstitialSplash.setRevenueListener(ad -> GamLogEventManager.logPaidAdImpression(context,ad, AdType.INTERSTITIAL));
+        interstitialSplash.setRevenueListener(ad -> {
+            GamLogEventManager.logPaidAdImpression(context, ad, AdType.INTERSTITIAL);
+            if (tokenAdjust != null) {
+                GamLogEventManager.logPaidAdjustWithTokenMax(ad, ad.getAdUnitId(), tokenAdjust);
+            }
+        });
         interstitialSplash.setListener(new MaxAdListener() {
             @Override
             public void onAdLoaded(MaxAd ad) {
@@ -464,14 +469,14 @@ public class AppLovin {
         }
     }
 
-    public void onCheckShowSplashWhenFail(Activity activity, AppLovinCallback callback, int timeDelay) {
+    public void onCheckShowSplashWhenFail(Activity activity, AppLovinCallback callback, int timeDelay, String tokenAdjust) {
         if (AppLovin.getInstance().getInterstitialSplash() != null && !AppLovin.getInstance().isShowLoadingSplash) {
             new Handler(activity.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (AppLovin.getInstance().getInterstitialSplash().isReady()) {
                         Log.i(TAG, "show ad splash when show fail in background");
-                        AppLovin.getInstance().onShowSplash(activity, callback);
+                        AppLovin.getInstance().onShowSplash(activity, callback, tokenAdjust);
                     } else {
                         callback.onAdClosed();
                     }
@@ -544,9 +549,9 @@ public class AppLovin {
      * @param interstitialAd
      * @param callback
      */
-    public void forceShowInterstitial(Context context, MaxInterstitialAd interstitialAd, final AdCallback callback, boolean shouldReload) {
+    public void forceShowInterstitial(Context context, MaxInterstitialAd interstitialAd, final AdCallback callback, boolean shouldReload, String tokenAdjust) {
         currentClicked = numShowAds;
-        showInterstitialAdByTimes(context, interstitialAd, callback, shouldReload);
+        showInterstitialAdByTimes(context, interstitialAd, callback, shouldReload, tokenAdjust);
     }
 
     /**
@@ -559,7 +564,7 @@ public class AppLovin {
      * @param callback
      * @param shouldReloadAds
      */
-    public void showInterstitialAdByTimes(final Context context, MaxInterstitialAd interstitialAd, final AdCallback callback, final boolean shouldReloadAds) {
+    public void showInterstitialAdByTimes(final Context context, MaxInterstitialAd interstitialAd, final AdCallback callback, final boolean shouldReloadAds, String tokenAdjust) {
         AppLovinHelper.setupAppLovinData(context);
         if (AppPurchase.getInstance().isPurchased(context)) {
             callback.onAdClosed();
@@ -572,7 +577,12 @@ public class AppLovin {
             return;
         }
 
-        interstitialAd.setRevenueListener(ad -> GamLogEventManager.logPaidAdImpression(context,ad, AdType.INTERSTITIAL));
+        interstitialAd.setRevenueListener(ad -> {
+            GamLogEventManager.logPaidAdImpression(context, ad, AdType.INTERSTITIAL);
+            if (tokenAdjust != null) {
+                GamLogEventManager.logPaidAdjustWithTokenMax(ad, ad.getAdUnitId(), tokenAdjust);
+            }
+        });
         interstitialAd.setListener(new MaxAdListener() {
             @Override
             public void onAdLoaded(MaxAd ad) {
@@ -680,16 +690,16 @@ public class AppLovin {
      * @param mActivity
      * @param id
      */
-    public void loadBanner(final Activity mActivity, String id) {
+    public void loadBanner(final Activity mActivity, String id, String tokenAdjust) {
         final FrameLayout adContainer = mActivity.findViewById(R.id.banner_container);
         final ShimmerFrameLayout containerShimmer = mActivity.findViewById(R.id.shimmer_container_banner);
-        loadBanner(mActivity, id, adContainer, containerShimmer);
+        loadBanner(mActivity, id, adContainer, containerShimmer, tokenAdjust);
     }
 
-    public void loadBanner(final Activity mActivity, String id, final AdCallback adCallback) {
+    public void loadBanner(final Activity mActivity, String id, final AdCallback adCallback, String tokenAdjust) {
         final FrameLayout adContainer = mActivity.findViewById(R.id.banner_container);
         final ShimmerFrameLayout containerShimmer = mActivity.findViewById(R.id.shimmer_container_banner);
-        loadBanner(mActivity, id, adContainer, containerShimmer, adCallback);
+        loadBanner(mActivity, id, adContainer, containerShimmer, adCallback, tokenAdjust);
     }
 
     /**
@@ -699,19 +709,19 @@ public class AppLovin {
      * @param id
      * @param rootView
      */
-    public void loadBannerFragment(final Activity mActivity, String id, final View rootView) {
+    public void loadBannerFragment(final Activity mActivity, String id, final View rootView, String tokenAdjust) {
         final FrameLayout adContainer = rootView.findViewById(R.id.banner_container);
         final ShimmerFrameLayout containerShimmer = rootView.findViewById(R.id.shimmer_container_banner);
-        loadBanner(mActivity, id, adContainer, containerShimmer);
+        loadBanner(mActivity, id, adContainer, containerShimmer, tokenAdjust);
     }
 
-    public void loadBannerFragment(final Activity mActivity, String id, final View rootView, final AdCallback adCallback) {
+    public void loadBannerFragment(final Activity mActivity, String id, final View rootView, final AdCallback adCallback, String tokenAdjust) {
         final FrameLayout adContainer = rootView.findViewById(R.id.banner_container);
         final ShimmerFrameLayout containerShimmer = rootView.findViewById(R.id.shimmer_container_banner);
-        loadBanner(mActivity, id, adContainer, containerShimmer, adCallback);
+        loadBanner(mActivity, id, adContainer, containerShimmer, adCallback, tokenAdjust);
     }
 
-    private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, final ShimmerFrameLayout containerShimmer) {
+    private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, final ShimmerFrameLayout containerShimmer, String tokenAdjust) {
         if (AppPurchase.getInstance().isPurchased(mActivity)) {
             containerShimmer.setVisibility(View.GONE);
             return;
@@ -719,7 +729,12 @@ public class AppLovin {
         containerShimmer.setVisibility(View.VISIBLE);
         containerShimmer.startShimmer();
         MaxAdView adView = new MaxAdView(id, mActivity);
-        adView.setRevenueListener(ad -> GamLogEventManager.logPaidAdImpression( mActivity,ad, AdType.BANNER));
+        adView.setRevenueListener(ad -> {
+            GamLogEventManager.logPaidAdImpression(mActivity, ad, AdType.BANNER);
+            if (tokenAdjust != null) {
+                GamLogEventManager.logPaidAdjustWithTokenMax(ad, ad.getAdUnitId(), tokenAdjust);
+            }
+        });
         int width = ViewGroup.LayoutParams.MATCH_PARENT;
         // Banner height on phones and tablets is 50 and 90, respectively
         int heightPx = mActivity.getResources().getDimensionPixelSize(R.dimen.banner_height);
@@ -777,7 +792,7 @@ public class AppLovin {
         adView.loadAd();
     }
 
-    private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, final ShimmerFrameLayout containerShimmer, final AdCallback adCallback) {
+    private void loadBanner(final Activity mActivity, String id, final FrameLayout adContainer, final ShimmerFrameLayout containerShimmer, final AdCallback adCallback, String tokenAdjust) {
         if (AppPurchase.getInstance().isPurchased(mActivity)) {
             containerShimmer.setVisibility(View.GONE);
             return;
@@ -785,7 +800,12 @@ public class AppLovin {
         containerShimmer.setVisibility(View.VISIBLE);
         containerShimmer.startShimmer();
         MaxAdView adView = new MaxAdView(id, mActivity);
-        adView.setRevenueListener(ad -> GamLogEventManager.logPaidAdImpression(mActivity,ad, AdType.BANNER));
+        adView.setRevenueListener(ad -> {
+            GamLogEventManager.logPaidAdImpression(mActivity, ad, AdType.BANNER);
+            if (tokenAdjust != null) {
+                GamLogEventManager.logPaidAdjustWithTokenMax(ad, ad.getAdUnitId(), tokenAdjust);
+            }
+        });
         int width = ViewGroup.LayoutParams.MATCH_PARENT;
         // Banner height on phones and tablets is 50 and 90, respectively
         int heightPx = mActivity.getResources().getDimensionPixelSize(R.dimen.banner_height);
@@ -848,32 +868,32 @@ public class AppLovin {
         adView.loadAd();
     }
 
-    public void loadNative(final Activity mActivity, String adUnitId) {
+    public void loadNative(final Activity mActivity, String adUnitId, String tokenAdjust) {
         final FrameLayout frameLayout = mActivity.findViewById(R.id.fl_adplaceholder);
         final ShimmerFrameLayout containerShimmer = mActivity.findViewById(R.id.shimmer_container_native);
-        loadNativeAd(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_max_free_size);
+        loadNativeAd(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_max_free_size, tokenAdjust);
     }
 
-    public void loadNativeSmall(final Activity mActivity, String adUnitId) {
+    public void loadNativeSmall(final Activity mActivity, String adUnitId, String tokenAdjust) {
         final FrameLayout frameLayout = mActivity.findViewById(R.id.fl_adplaceholder);
         final ShimmerFrameLayout containerShimmer = mActivity.findViewById(R.id.shimmer_container_native);
-        loadNativeAd(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_max_medium);
+        loadNativeAd(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_max_medium, tokenAdjust);
     }
 
-    public void loadNativeFragment(final Activity mActivity, String adUnitId, View parent) {
+    public void loadNativeFragment(final Activity mActivity, String adUnitId, View parent, String tokenAdjust) {
         final FrameLayout frameLayout = parent.findViewById(R.id.fl_adplaceholder);
         final ShimmerFrameLayout containerShimmer = parent.findViewById(R.id.shimmer_container_native);
-        loadNativeAd(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_max_free_size);
+        loadNativeAd(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_max_free_size, tokenAdjust);
     }
 
-    public void loadNativeSmallFragment(final Activity mActivity, String adUnitId, View parent) {
+    public void loadNativeSmallFragment(final Activity mActivity, String adUnitId, View parent, String tokenAdjust) {
         final FrameLayout frameLayout = parent.findViewById(R.id.fl_adplaceholder);
         final ShimmerFrameLayout containerShimmer = parent.findViewById(R.id.shimmer_container_native);
-        loadNativeAd(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_max_medium);
+        loadNativeAd(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_max_medium, tokenAdjust);
     }
 
 
-    public void loadNativeAd(Activity activity, ShimmerFrameLayout containerShimmer, FrameLayout nativeAdLayout, String id, int layoutCustomNative) {
+    public void loadNativeAd(Activity activity, ShimmerFrameLayout containerShimmer, FrameLayout nativeAdLayout, String id, int layoutCustomNative, String tokenAdjust) {
 
         if (AppPurchase.getInstance().isPurchased(context)) {
             containerShimmer.setVisibility(View.GONE);
@@ -897,7 +917,12 @@ public class AppLovin {
         nativeAdView = new MaxNativeAdView(binder, activity);
 
         MaxNativeAdLoader nativeAdLoader = new MaxNativeAdLoader(id, activity);
-        nativeAdLoader.setRevenueListener(ad -> GamLogEventManager.logPaidAdImpression( activity,ad, AdType.NATIVE));
+        nativeAdLoader.setRevenueListener(ad -> {
+            GamLogEventManager.logPaidAdImpression(activity, ad, AdType.NATIVE);
+            if (tokenAdjust != null) {
+                GamLogEventManager.logPaidAdjustWithTokenMax(ad, ad.getAdUnitId(), tokenAdjust);
+            }
+        });
         nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
             @Override
             public void onNativeAdLoaded(final MaxNativeAdView nativeAdView, final MaxAd ad) {
@@ -934,7 +959,7 @@ public class AppLovin {
         nativeAdLoader.loadAd(nativeAdView);
     }
 
-    public void loadNativeAd(Activity activity, String id, int layoutCustomNative, AppLovinCallback callback) {
+    public void loadNativeAd(Activity activity, String id, int layoutCustomNative, AppLovinCallback callback, String tokenAdjust) {
 
         if (AppPurchase.getInstance().isPurchased(context)) {
             callback.onAdClosed();
@@ -954,7 +979,12 @@ public class AppLovin {
         nativeAdView = new MaxNativeAdView(binder, activity);
 
         MaxNativeAdLoader nativeAdLoader = new MaxNativeAdLoader(id, activity);
-        nativeAdLoader.setRevenueListener(ad -> GamLogEventManager.logPaidAdImpression( activity,ad, AdType.NATIVE));
+        nativeAdLoader.setRevenueListener(ad -> {
+            GamLogEventManager.logPaidAdImpression(activity, ad, AdType.NATIVE);
+            if (tokenAdjust != null) {
+                GamLogEventManager.logPaidAdjustWithTokenMax(ad, ad.getAdUnitId(), tokenAdjust);
+            }
+        });
         nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
             @Override
             public void onNativeAdLoaded(final MaxNativeAdView nativeAdView, final MaxAd ad) {
@@ -1096,9 +1126,14 @@ public class AppLovin {
         return rewardedAd;
     }
 
-    public void showRewardAd(Activity activity, MaxRewardedAd maxRewardedAd, AppLovinCallback callback) {
+    public void showRewardAd(Activity activity, MaxRewardedAd maxRewardedAd, AppLovinCallback callback, String tokenAdjust) {
         if (maxRewardedAd.isReady()) {
-            maxRewardedAd.setRevenueListener(ad -> GamLogEventManager.logPaidAdImpression( activity,ad, AdType.REWARDED));
+            maxRewardedAd.setRevenueListener(ad -> {
+                GamLogEventManager.logPaidAdImpression(activity, ad, AdType.REWARDED);
+                if (tokenAdjust != null) {
+                    GamLogEventManager.logPaidAdjustWithTokenMax(ad, ad.getAdUnitId(), tokenAdjust);
+                }
+            });
             maxRewardedAd.setListener(new MaxRewardedAdListener() {
                 @Override
                 public void onRewardedVideoStarted(MaxAd ad) {
@@ -1160,9 +1195,14 @@ public class AppLovin {
         }
     }
 
-    public void showRewardAd(Activity activity, MaxRewardedAd maxRewardedAd) {
+    public void showRewardAd(Activity activity, MaxRewardedAd maxRewardedAd, String tokenAdjust) {
         if (maxRewardedAd.isReady()) {
-            maxRewardedAd.setRevenueListener(ad -> GamLogEventManager.logPaidAdImpression( activity,ad, AdType.REWARDED));
+            maxRewardedAd.setRevenueListener(ad -> {
+                GamLogEventManager.logPaidAdImpression(activity, ad, AdType.REWARDED);
+                if (tokenAdjust != null) {
+                    GamLogEventManager.logPaidAdjustWithTokenMax(ad, ad.getAdUnitId(), tokenAdjust);
+                }
+            });
             maxRewardedAd.showAd();
         } else {
             Log.e(TAG, "showRewardAd error -  reward ad not ready");

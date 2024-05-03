@@ -279,7 +279,7 @@ public class GamAd {
                 Admob.getInstance().loadBanner(mActivity, id, adConfig.getAdjustTokenTiktok());
                 break;
             case GamAdConfig.PROVIDER_MAX:
-                AppLovin.getInstance().loadBanner(mActivity, id);
+                AppLovin.getInstance().loadBanner(mActivity, id, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -337,7 +337,7 @@ public class GamAd {
                         super.onAdImpression();
                         adCallback.onAdImpression();
                     }
-                });
+                }, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -355,7 +355,7 @@ public class GamAd {
                 Admob.getInstance().loadBannerFragment(mActivity, id, rootView, adConfig.getAdjustTokenTiktok());
                 break;
             case GamAdConfig.PROVIDER_MAX:
-                AppLovin.getInstance().loadBannerFragment(mActivity, id, rootView);
+                AppLovin.getInstance().loadBannerFragment(mActivity, id, rootView, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -385,7 +385,7 @@ public class GamAd {
                 Admob.getInstance().loadBannerFragment(mActivity, id, rootView, adCallback, adConfig.getAdjustTokenTiktok());
                 break;
             case GamAdConfig.PROVIDER_MAX:
-                AppLovin.getInstance().loadBannerFragment(mActivity, id, rootView, adCallback);
+                AppLovin.getInstance().loadBannerFragment(mActivity, id, rootView, adCallback, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -512,7 +512,7 @@ public class GamAd {
                             adListener.onAdClicked();
                         }
                     }
-                });
+                }, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -610,7 +610,7 @@ public class GamAd {
                             adListener.onAdClicked();
                         }
                     }
-                });
+                }, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -656,7 +656,7 @@ public class GamAd {
                         adListener.onNextAction();
                     }
 
-                });
+                }, adConfig.getAdjustTokenTiktok());
 
         }
     }
@@ -726,7 +726,7 @@ public class GamAd {
                         super.onAdFailedToShow(adError);
                         callback.onAdFailedToShow(new ApAdError(adError));
                     }
-                }, timeDelay);
+                }, timeDelay, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -1039,7 +1039,7 @@ public class GamAd {
                         super.onInterstitialShow();
                         callback.onInterstitialShow();
                     }
-                }, false);
+                }, false, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -1194,7 +1194,7 @@ public class GamAd {
                             callback.onInterstitialShow();
                         }
                     }
-                }, false);
+                }, false, adConfig.getAdjustTokenTiktok());
         }
     }
 
@@ -1246,7 +1246,7 @@ public class GamAd {
                         super.onAdFailedToLoad(i);
                         Log.e(TAG, "onAdFailedToLoad : NativeAd");
                     }
-                });
+                }, adConfig.getAdjustTokenTiktok());
                 break;
         }
     }
@@ -1292,7 +1292,7 @@ public class GamAd {
                         super.onAdFailedToLoad(i);
                         Log.e(TAG, "onAdFailedToLoad : NativeAd");
                     }
-                });
+                }, adConfig.getAdjustTokenTiktok());
                 break;
         }
     }
@@ -1365,7 +1365,7 @@ public class GamAd {
                         super.onAdClicked();
                         callback.onAdClicked();
                     }
-                });
+                }, adConfig.getAdjustTokenTiktok());
                 break;
         }
     }
@@ -1427,7 +1427,7 @@ public class GamAd {
                         super.onAdClicked();
                         callback.onAdClicked();
                     }
-                });
+                }, adConfig.getAdjustTokenTiktok());
                 break;
         }
     }
@@ -1670,7 +1670,7 @@ public class GamAd {
                             callback.onAdClicked();
                         }
                     }
-                });
+                }, adConfig.getAdjustTokenTiktok());
         }
     }
 
