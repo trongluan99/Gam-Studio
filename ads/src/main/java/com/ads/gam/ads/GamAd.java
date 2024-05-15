@@ -1432,6 +1432,87 @@ public class GamAd {
         }
     }
 
+    public void loadNativeAdsFullScreen(final Activity activity, String id,
+                                        int layoutCustomNative, FrameLayout adPlaceHolder, ShimmerFrameLayout
+                                                containerShimmerLoading, GamAdCallback callback){
+
+        switch (adConfig.getMediationProvider()) {
+            case GamAdConfig.PROVIDER_ADMOB:
+                Admob.getInstance().loadNativeAdsFullScreen(((Context) activity), id, new AdCallback() {
+                    @Override
+                    public void onUnifiedNativeAdLoaded(@NonNull NativeAd unifiedNativeAd) {
+                        super.onUnifiedNativeAdLoaded(unifiedNativeAd);
+                        callback.onNativeAdLoaded(new ApNativeAd(layoutCustomNative, unifiedNativeAd));
+                        populateNativeAdView(activity, new ApNativeAd(layoutCustomNative, unifiedNativeAd), adPlaceHolder, containerShimmerLoading);
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        super.onAdImpression();
+                        callback.onAdImpression();
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@Nullable LoadAdError i) {
+                        super.onAdFailedToLoad(i);
+                        callback.onAdFailedToLoad(new ApAdError(i));
+                    }
+
+                    @Override
+                    public void onAdFailedToShow(@Nullable AdError adError) {
+                        super.onAdFailedToShow(adError);
+                        callback.onAdFailedToShow(new ApAdError(adError));
+                    }
+
+                    @Override
+                    public void onAdClicked() {
+                        super.onAdClicked();
+                        callback.onAdClicked();
+                    }
+                }, adConfig.getAdjustTokenTiktok());
+                break;
+            case GamAdConfig.PROVIDER_MAX:
+                break;
+        }
+    }
+
+    public void loadNativeAdsFullScreen(final Activity activity, String id,
+                                        int layoutCustomNative, GamAdCallback callback){
+
+        switch (adConfig.getMediationProvider()) {
+            case GamAdConfig.PROVIDER_ADMOB:
+                Admob.getInstance().loadNativeAdsFullScreen(((Context) activity), id, new AdCallback() {
+                    @Override
+                    public void onUnifiedNativeAdLoaded(@NonNull NativeAd unifiedNativeAd) {
+                        super.onUnifiedNativeAdLoaded(unifiedNativeAd);
+                        callback.onNativeAdLoaded(new ApNativeAd(layoutCustomNative, unifiedNativeAd));
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@Nullable LoadAdError i) {
+                        super.onAdFailedToLoad(i);
+                        callback.onAdFailedToLoad(new ApAdError(i));
+                    }
+
+                    @Override
+                    public void onAdFailedToShow(@Nullable AdError adError) {
+                        super.onAdFailedToShow(adError);
+                        callback.onAdFailedToShow(new ApAdError(adError));
+                    }
+
+                    @Override
+                    public void onAdClicked() {
+                        super.onAdClicked();
+                        callback.onAdClicked();
+                    }
+                }, adConfig.getAdjustTokenTiktok());
+                break;
+            case GamAdConfig.PROVIDER_MAX:
+                break;
+        }
+    }
+
+
     /**
      * Populate Unified Native Ad to View
      *

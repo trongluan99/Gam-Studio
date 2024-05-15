@@ -60,6 +60,7 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MediaAspectRatio;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.RequestConfiguration;
@@ -2175,6 +2176,27 @@ public class Admob {
         }
     }
 
+    private void loadInlineAdaptiveBanner(final Activity mActivity, String id, AdCallback adCallback) {
+        AdSize adSize = AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(mActivity, 320);
+        AdView bannerView = new AdView(mActivity);
+        bannerView.setAdUnitId(id);
+        bannerView.setAdSize(adSize);
+        bannerView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                adCallback.onAdLoaded();
+            }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
+                adCallback.onAdFailedToLoad(loadAdError);
+            }
+        });
+        bannerView.loadAd(getAdRequest());
+    }
+
     private AdSize getAdSize(Activity mActivity, Boolean useInlineAdaptive, String inlineStyle) {
 
         // Step 2 - Determine the screen width (less decorations) to use for the ad width.
@@ -2204,14 +2226,6 @@ public class Admob {
         Bundle admobExtras = new Bundle();
         admobExtras.putString("collapsible", gravity);
         builder.addNetworkExtrasBundle(AdMobAdapter.class, admobExtras);
-        // no need from facebook sdk ver 6.12.0.0
-        /*if (isFan) {
-            Bundle extras = new FacebookExtras()
-                    .setNativeBanner(true)
-                    .build();
-
-            builder.addNetworkExtrasBundle(FacebookAdapter.class, extras);
-        }*/
 
         if (isAdcolony) {
             AdColonyBundleBuilder.setShowPrePopup(true);
@@ -2533,6 +2547,135 @@ public class Admob {
         adLoader.loadAd(getAdRequest());
     }
 
+    public void loadNativeAdsFullScreen(Context context, String id, final AdCallback callback, String tokenAdjust) {
+        if (Arrays.asList(context.getResources().getStringArray(R.array.list_id_test)).contains(id)) {
+            showTestIdAlert(context, NATIVE_ADS, id);
+        }
+        if (AppPurchase.getInstance().isPurchased(context)) {
+            return;
+        }
+
+        VideoOptions videoOptions =
+                new VideoOptions.Builder().setStartMuted(false).build();
+        NativeAdOptions adOptions =
+                new NativeAdOptions.Builder()
+                        .setMediaAspectRatio(MediaAspectRatio.PORTRAIT)
+                        .setVideoOptions(videoOptions)
+                        .build();
+        AdLoader adLoader = new AdLoader.Builder(context, id)
+                .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
+
+                    @Override
+                    public void onNativeAdLoaded(@NonNull NativeAd nativeAd) {
+                        callback.onUnifiedNativeAdLoaded(nativeAd);
+                        nativeAd.setOnPaidEventListener(adValue -> {
+                            GamLogEventManager.logPaidAdImpression(context,
+                                    adValue,
+                                    id,
+                                    nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+
+                            if (tokenAdjust != null) {
+                                GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
+                            }
+                        });
+                    }
+                })
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError error) {
+                        Log.e(TAG, "NativeAd onAdFailedToLoad: " + error.getMessage());
+                        callback.onAdFailedToLoad(error);
+                    }
+
+                    @Override
+                    public void onAdClicked() {
+                        super.onAdClicked();
+                        if (disableAdResumeWhenClickAds)
+                            AppOpenManager.getInstance().disableAdResumeByClickAction();
+                        if (callback != null) {
+                            callback.onAdClicked();
+                            Log.d(TAG, "onAdClicked");
+                        }
+                        GamLogEventManager.logClickAdsEvent(context, id);
+                    }
+                })
+                .withNativeAdOptions(adOptions)
+                .build();
+        adLoader.loadAds(getAdRequest(), 5);
+
+    }
+
+    public void loadNativeAdsFullScreen(final Context context, final ShimmerFrameLayout containerShimmer, final FrameLayout frameLayout, final String id, final int layout, final AdCallback callback, String tokenAdjust) {
+        if (Arrays.asList(context.getResources().getStringArray(R.array.list_id_test)).contains(id)) {
+            showTestIdAlert(context, NATIVE_ADS, id);
+        }
+        if (AppPurchase.getInstance().isPurchased(context)) {
+            containerShimmer.setVisibility(View.GONE);
+            return;
+        }
+        frameLayout.removeAllViews();
+        frameLayout.setVisibility(View.GONE);
+        containerShimmer.setVisibility(View.VISIBLE);
+        containerShimmer.startShimmer();
+
+        VideoOptions videoOptions = new VideoOptions.Builder()
+                .setStartMuted(true)
+                .build();
+
+        NativeAdOptions adOptions = new NativeAdOptions.Builder()
+                .setMediaAspectRatio(MediaAspectRatio.PORTRAIT)
+                .setVideoOptions(videoOptions)
+                .build();
+
+
+        AdLoader adLoader = new AdLoader.Builder(context, id)
+                .forNativeAd(nativeAd -> {
+                    containerShimmer.stopShimmer();
+                    containerShimmer.setVisibility(View.GONE);
+                    frameLayout.setVisibility(View.VISIBLE);
+                    @SuppressLint("InflateParams") NativeAdView adView = (NativeAdView) LayoutInflater.from(context)
+                            .inflate(layout, null);
+                    nativeAd.setOnPaidEventListener(adValue -> {
+
+                        GamLogEventManager.logPaidAdImpression(context,
+                                adValue,
+                                id,
+                                nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        if (tokenAdjust != null) {
+                            GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
+                        }
+                    });
+                    populateUnifiedNativeAdView(nativeAd, adView);
+                    frameLayout.removeAllViews();
+                    frameLayout.addView(adView);
+                })
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError error) {
+                        containerShimmer.stopShimmer();
+                        containerShimmer.setVisibility(View.GONE);
+                        frameLayout.setVisibility(View.GONE);
+                    }
+
+
+                    @Override
+                    public void onAdClicked() {
+                        super.onAdClicked();
+                        if (disableAdResumeWhenClickAds)
+                            AppOpenManager.getInstance().disableAdResumeByClickAction();
+                        if (callback != null) {
+                            callback.onAdClicked();
+                        }
+                        GamLogEventManager.logClickAdsEvent(context, id);
+                    }
+                })
+                .withNativeAdOptions(adOptions)
+                .build();
+
+
+        adLoader.loadAds(getAdRequest(), 5);
+
+    }
 
     public void populateUnifiedNativeAdView(NativeAd nativeAd, NativeAdView adView) {
 
