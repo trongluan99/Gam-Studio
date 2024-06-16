@@ -1792,7 +1792,6 @@ public class Admob {
     }
 
     public RewardedAd getRewardedAd() {
-
         return rewardedAd;
     }
 

@@ -34,6 +34,7 @@ import com.ads.gam.ads.wrapper.ApNativeAd;
 import com.ads.gam.config.GamAdConfig;
 import com.ads.gam.event.GamAdjust;
 import com.ads.gam.funtion.AdCallback;
+import com.ads.gam.funtion.RewardCallback;
 import com.ads.gam.util.AppUtil;
 import com.ads.gam.util.SharePreferenceUtils;
 import com.facebook.FacebookSdk;
@@ -44,6 +45,8 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 
 public class GamAd {
     public static final String TAG_ADJUST = "GamAdjust";
@@ -442,4 +445,27 @@ public class GamAd {
         adPlaceHolder.addView(adView);
     }
 
+    public void initRewardAds(Context context, String id) {
+        Admob.getInstance().initRewardAds(context, id);
+    }
+
+    public void initRewardAds(Context context, String id, AdCallback callback) {
+        Admob.getInstance().initRewardAds(context, id, callback);
+    }
+
+    public void getRewardInterstitial(Context context, String id, AdCallback callback) {
+        Admob.getInstance().getRewardInterstitial(context, id, callback);
+    }
+
+    public void showRewardInterstitial(Activity activity, RewardedInterstitialAd rewardedInterstitialAd, RewardCallback adCallback) {
+        Admob.getInstance().showRewardInterstitial(activity, rewardedInterstitialAd, adCallback);
+    }
+
+    public void showRewardAds(Activity context, RewardCallback adCallback) {
+        Admob.getInstance().showRewardAds(context, adCallback);
+    }
+
+    public void showRewardAds(Activity context, RewardedAd rewardedAd, RewardCallback adCallback) {
+        Admob.getInstance().showRewardAds(context, rewardedAd, adCallback);
+    }
 }
