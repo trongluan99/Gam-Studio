@@ -503,7 +503,6 @@ public class AppPurchase {
             return "";
         }
 
-
         if (productDetails == null) {
             return "Product ID invalid";
         }
@@ -573,15 +572,15 @@ public class AppPurchase {
     }
 
     public String subscribe(Activity activity, String SubsId) {
-        if (skuListSubsFromStore == null) {
-            if (purchaseListener != null)
-                purchaseListener.displayErrorMessage("Billing error init");
-            return "";
-        }
-
         if (AppUtil.VARIANT_DEV) {
             purchase(activity, PRODUCT_ID_TEST);
             return "Billing test";
+        } else {
+            if (skuListSubsFromStore == null) {
+                if (purchaseListener != null)
+                    purchaseListener.displayErrorMessage("Billing error init");
+                return "";
+            }
         }
         ProductDetails productDetails = skuDetailsSubsMap.get(SubsId);
         if (productDetails == null) {
