@@ -1,4 +1,4 @@
-# Mia Studio
+# Gam Studio
 - Admob
 - Mediation Admob (Facebook, Applovin, Vungle, Pangle, Mintegral)
 - Adjust
