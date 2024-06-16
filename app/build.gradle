@@ -4,14 +4,12 @@ plugins {
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion '31.0.0'
-
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.gam.module"
         minSdkVersion 24
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         def formattedDate = new Date().format('MMM.dd.yyyy')
@@ -75,7 +73,6 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.0-rc01'
     implementation 'androidx.work:work-runtime-ktx:2.7.0'
 
-    implementation 'com.applovin:applovin-sdk:11.4.2'
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 }
 repositories {

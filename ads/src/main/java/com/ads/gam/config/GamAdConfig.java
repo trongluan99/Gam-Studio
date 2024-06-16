@@ -11,16 +11,11 @@ public class GamAdConfig {
     public static final int PROVIDER_ADMOB = 0;
     public static final int PROVIDER_MAX = 1;
 
-
     public static final String ENVIRONMENT_DEVELOP = "develop";
     public static final String ENVIRONMENT_PRODUCTION = "production";
 
     public static final String DEFAULT_TOKEN_FACEBOOK_SDK = "client_token";
-
-    /**
-     * config ad mediation using for app
-     */
-    private int mediationProvider = PROVIDER_ADMOB;
+    public static String ADJUST_TOKEN_TIKTOK = "client_token_adjust_tiktok";
 
     private boolean isVariantDev = false;
 
@@ -29,10 +24,6 @@ public class GamAdConfig {
      */
     private AdjustConfig adjustConfig;
 
-    /**
-     * appsflyerConfig enable Appsflyer and setup dev key
-     */
-    private AppsflyerConfig appsflyerConfig;
     /**
      * eventNamePurchase push event to adjust when user purchased
      */
@@ -44,6 +35,8 @@ public class GamAdConfig {
     private boolean enableAdResume = false;
     private String facebookClientToken = DEFAULT_TOKEN_FACEBOOK_SDK;
 
+    private String adjustTokenTiktok;
+
     /**
      * intervalInterstitialAd: time between two interstitial ad impressions
      * unit: seconds
@@ -54,19 +47,12 @@ public class GamAdConfig {
         this.application = application;
     }
 
-    public GamAdConfig(Application application, int mediationProvider, String environment) {
-        this.mediationProvider = mediationProvider;
+    public GamAdConfig(Application application, String environment) {
         this.isVariantDev = environment.equals(ENVIRONMENT_DEVELOP);
         this.application = application;
     }
 
-
-    public void setMediationProvider(int mediationProvider) {
-        this.mediationProvider = mediationProvider;
-    }
-
     /**
-     *
      * @param isVariantDev
      */
     @Deprecated
@@ -86,14 +72,6 @@ public class GamAdConfig {
         this.adjustConfig = adjustConfig;
     }
 
-    public AppsflyerConfig getAppsflyerConfig() {
-        return appsflyerConfig;
-    }
-
-    public void setAppsflyerConfig(AppsflyerConfig appsflyerConfig) {
-        this.appsflyerConfig = appsflyerConfig;
-    }
-
     public String getEventNamePurchase() {
         return eventNamePurchase;
     }
@@ -102,10 +80,6 @@ public class GamAdConfig {
         return application;
     }
 
-
-    public int getMediationProvider() {
-        return mediationProvider;
-    }
 
     public Boolean isVariantDev() {
         return isVariantDev;
@@ -141,12 +115,6 @@ public class GamAdConfig {
         return adjustConfig.isEnableAdjust();
     }
 
-    public boolean isEnableAppsflyer() {
-        if (appsflyerConfig == null)
-            return false;
-        return appsflyerConfig.isEnableAppsflyer();
-    }
-
     public int getIntervalInterstitialAd() {
         return intervalInterstitialAd;
     }
@@ -161,5 +129,14 @@ public class GamAdConfig {
 
     public String getFacebookClientToken() {
         return this.facebookClientToken;
+    }
+
+    public String getAdjustTokenTiktok() {
+        return adjustTokenTiktok;
+    }
+
+    public void setAdjustTokenTiktok(String adjustTokenTiktok) {
+        ADJUST_TOKEN_TIKTOK = adjustTokenTiktok;
+        this.adjustTokenTiktok = adjustTokenTiktok;
     }
 }

@@ -40,7 +40,6 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:text="@string/offline_notification_text"
                 android:textColor="@android:color/black"
                 android:textSize="10dp" />
 

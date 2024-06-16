@@ -12,13 +12,14 @@ import java.util.List;
 @Deprecated
 public abstract class AdsApplication extends Application {
 
-    protected GamAdConfig gamAdConfig;
-    protected List<String> listTestDevice ;
+    protected GamAdConfig mGamAdConfig;
+    protected List<String> listTestDevice;
+
     @Override
     public void onCreate() {
         super.onCreate();
         listTestDevice = new ArrayList<String>();
-        gamAdConfig = new GamAdConfig(this);
+        mGamAdConfig = new GamAdConfig(this);
         if (SharePreferenceUtils.getInstallTime(this) == 0) {
             SharePreferenceUtils.setInstallTime(this);
         }

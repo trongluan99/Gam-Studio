@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="12dp"
-                android:text="@string/remove_all_anoying_ads_forever_by_just"
+                android:text="@string/remove_all_annoying_ads_forever_by_just"
                 android:textColor="@color/gntGray"
                 android:textSize="@dimen/_14sdp" />
 

@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.ads.gam.billing.AppPurchase;
 import com.ads.gam.R;
+import com.ads.gam.billing.AppPurchase;
 
 public class InAppDialog extends Dialog {
     private Context mContext;
@@ -41,7 +41,7 @@ public class InAppDialog extends Dialog {
         findViewById(R.id.tv_purchase).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                callback.onPurcharse();
+                callback.onPurchase();
             }
         });
         TextView tvOldPrice = findViewById(R.id.tv_old_price);
@@ -53,12 +53,11 @@ public class InAppDialog extends Dialog {
             tvOldPrice.setVisibility(View.VISIBLE);
             findViewById(R.id.view_split).setVisibility(View.VISIBLE);
         }
-//        tvOldPrice.setText(AppPurchase.getInstance().getOldPrice());
         tvPrice.setText(AppPurchase.getInstance().getPrice(AppPurchase.PRODUCT_ID_TEST));
         tvOldPrice.setPaintFlags(tvOldPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
     }
 
     public interface ICallback {
-        void onPurcharse();
+        void onPurchase();
     }
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -33,7 +32,7 @@
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
                 android:orientation="vertical">
 
                 <TextView
@@ -42,7 +41,6 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:text="@string/offline_notification_text"
                     android:textColor="@android:color/black"
                     android:textSize="@dimen/_14sdp" />
 
@@ -64,6 +62,23 @@
                         android:textStyle="bold" />
 
                 </LinearLayout>
+
+                <RatingBar
+                    android:id="@+id/ad_stars"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="13dp"
+                    android:numStars="5"
+                    android:progressDrawable="@drawable/ratingbar_full"
+                    android:rating="3.5"
+                    android:stepSize="0.01" />
+
+                <TextView
+                    android:id="@+id/ad_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gntBlack"
+                    android:textSize="@dimen/_10sdp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -78,29 +93,12 @@
             app:layout_constraintStart_toStartOf="@+id/linearLayout3"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
 
-        <RatingBar
-            android:id="@+id/ad_stars"
-
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/gnt_no_margin"
-            android:lines="1"
-            android:numStars="5"
-            android:stepSize="0.1"
-            android:textColor="#000"
-            android:textSize="@dimen/gnt_text_size_small"
-
-            app:layout_constraintBottom_toBottomOf="@+id/txtRate"
-            app:layout_constraintStart_toEndOf="@+id/txtRate"
-            app:layout_constraintTop_toTopOf="@+id/txtRate" />
-
         <Button
             android:id="@+id/ad_call_to_action"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
 
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginVertical="8dp"
             android:background="@drawable/ads_bg_lib"
             android:gravity="center"
             android:text="Cài Đặt"
@@ -110,7 +108,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/ad_body"
             app:layout_constraintStart_toStartOf="@+id/ad_body"
-            app:layout_constraintTop_toBottomOf="@+id/ad_stars" />
+            app:layout_constraintTop_toBottomOf="@+id/ad_body" />
 
 
         <TextView
@@ -118,19 +116,7 @@
             style="@style/AppTheme.Ads"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/txtRate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="TextView"
-            app:layout_constraintStart_toStartOf="@+id/ad_body"
-            app:layout_constraintTop_toBottomOf="@+id/ad_body" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
 
 
 </com.google.android.gms.ads.nativead.NativeAdView>
