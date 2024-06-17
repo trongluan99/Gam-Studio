@@ -38,4 +38,31 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <Button
+        android:id="@+id/btnIap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="IAP"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnShow" />
+
+    <Button
+        android:id="@+id/btnLoadReward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Load Reward"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnIap" />
+
+    <Button
+        android:id="@+id/btnShowReward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Reward"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnLoadReward" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
