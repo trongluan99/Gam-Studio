@@ -165,7 +165,71 @@ GamAd.getInstance().loadNativeAdResultCallback(this, BuildConfig.ad_native, R.la
 if (mApNativeAd != null) {
             GamAd.getInstance().populateNativeAdView(this, mApNativeAd, frAds, shimmerAds);
         }
-~~~   
+~~~
+# Reward: Load
+~~~
+private RewardedAd rewardedAds;
+GamAd.getInstance().initRewardAds(this, BuildConfig.ad_reward, new AdCallback() {
+                @Override
+                public void onRewardAdLoaded(RewardedAd rewardedAd) {
+                    super.onRewardAdLoaded(rewardedAd);
+                    rewardedAds = rewardedAd;
+                    Toast.makeText(MainActivity.this, "Ads Ready", Toast.LENGTH_SHORT).show();
+                }
+            });
+~~~
+# Reward: Show
+~~~
+private boolean isEarn = false;
+btnShowReward.setOnClickListener(v -> {
+            isEarn = false;
+            GamAd.getInstance().showRewardAds(MainActivity.this, rewardedAds, new RewardCallback() {
+                @Override
+                public void onUserEarnedReward(RewardItem var1) {
+                    isEarn = true;
+                }
+
+                @Override
+                public void onRewardedAdClosed() {
+                    if (isEarn) {
+                        // action intent
+                    }
+                }
+
+                @Override
+                public void onRewardedAdFailedToShow(int codeError) {
+
+                }
+
+                @Override
+                public void onAdClicked() {
+
+                }
+            });
+        });
+~~~
+
+# In-App Purchase
+~~~
+AppPurchase.getInstance().setPurchaseListener(new PurchaseListener() {
+            @Override
+            public void onProductPurchased(String productId, String transactionDetails) {
+                Toast.makeText(MainActivity.this, "onProductPurchased", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void displayErrorMessage(String errorMsg) {
+                Toast.makeText(MainActivity.this, "displayErrorMessage", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onUserCancelBilling() {
+                Toast.makeText(MainActivity.this, "onUserCancelBilling", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+btnIap.setOnClickListener(v -> AppPurchase.getInstance().purchase(MainActivity.this, "android.test.purchased"));
+~~~
 
 
 
