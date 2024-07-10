@@ -65,19 +65,17 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.VideoOptions;
-import com.google.android.gms.ads.formats.NativeAdOptions;
 import com.google.android.gms.ads.initialization.AdapterStatus;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdOptions;
 import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
-import com.jirbo.adcolony.AdColonyAdapter;
-import com.jirbo.adcolony.AdColonyBundleBuilder;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -109,7 +107,6 @@ public class Admob {
     boolean isTimeDelay = false; //xử lý delay time show ads, = true mới show ads
     private boolean openActivityAfterShowInterAds = false;
     private Context context;
-//    private AppOpenAd appOpenAd = null;
 
     public static final String BANNER_INLINE_SMALL_STYLE = "BANNER_INLINE_SMALL_STYLE";
     public static final String BANNER_INLINE_LARGE_STYLE = "BANNER_INLINE_LARGE_STYLE";
@@ -251,28 +248,12 @@ public class Admob {
 
     public AdRequest getAdRequest() {
         AdRequest.Builder builder = new AdRequest.Builder();
-        // no need from facebook sdk ver 6.12.0.0
-        /*if (isFan) {
-            Bundle extras = new FacebookExtras()
-                    .setNativeBanner(true)
-                    .build();
-
-            builder.addNetworkExtrasBundle(FacebookAdapter.class, extras);
-        }*/
-
-        if (isAdcolony) {
-            AdColonyBundleBuilder.setShowPrePopup(true);
-            AdColonyBundleBuilder.setShowPostPopup(true);
-            builder.addNetworkExtrasBundle(AdColonyAdapter.class, AdColonyBundleBuilder.build());
-        }
-
         if (isAppLovin) {
             Bundle extras = new AppLovinExtras.Builder()
                     .setMuteAudio(true)
                     .build();
             builder.addNetworkExtrasBundle(ApplovinAdapter.class, extras);
         }
-//        builder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
         return builder.build();
     }
 
@@ -2229,12 +2210,6 @@ public class Admob {
         admobExtras.putString("collapsible_request_id", UUID.randomUUID().toString());
         builder.addNetworkExtrasBundle(AdMobAdapter.class, admobExtras);
 
-        if (isAdcolony) {
-            AdColonyBundleBuilder.setShowPrePopup(true);
-            AdColonyBundleBuilder.setShowPostPopup(true);
-            builder.addNetworkExtrasBundle(AdColonyAdapter.class, AdColonyBundleBuilder.build());
-        }
-
         if (isAppLovin) {
             Bundle extras = new AppLovinExtras.Builder()
                     .setMuteAudio(true)
@@ -3191,6 +3166,7 @@ public class Admob {
         return "";
     }
 
+    @SuppressLint("MissingPermission")
     private void showTestIdAlert(Context context, int typeAds, String id) {
         String content = "";
         switch (typeAds) {
