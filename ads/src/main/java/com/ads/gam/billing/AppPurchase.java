@@ -586,9 +586,13 @@ public class AppPurchase {
         if (productDetails == null) {
             return "Product ID invalid";
         }
-        ProductDetails skuDetails = skuDetailsSubsMap.get(SubsId);
-        List<ProductDetails.SubscriptionOfferDetails> subsDetail = skuDetails.getSubscriptionOfferDetails();
-        String offerToken = subsDetail.get(subsDetail.size() - 1).getOfferToken();
+        List<ProductDetails.SubscriptionOfferDetails> subsDetail = productDetails.getSubscriptionOfferDetails();
+        if (subsDetail == null || subsDetail.isEmpty()) {
+            return "No available offers for this subscription";
+        }
+
+        String offerToken = getOfferToken(subsDetail);
+
         ImmutableList<BillingFlowParams.ProductDetailsParams> productDetailsParamsList =
                 ImmutableList.of(
                         BillingFlowParams.ProductDetailsParams.newBuilder()
@@ -648,6 +652,25 @@ public class AppPurchase {
                 return "Subscribed Successfully";
         }
         return "";
+    }
+
+    private String getOfferToken(List<ProductDetails.SubscriptionOfferDetails> subsDetail) {
+        String offerToken = null;
+        for (ProductDetails.SubscriptionOfferDetails offer : subsDetail) {
+            List<ProductDetails.PricingPhase> pricingPhases = offer.getPricingPhases().getPricingPhaseList();
+            for (ProductDetails.PricingPhase phase : pricingPhases) {
+                if (phase.getPriceAmountMicros() == 0L) { // Free trial
+                    offerToken = offer.getOfferToken();
+                    break;
+                }
+            }
+            if (offerToken != null) break;
+        }
+
+        if (offerToken == null) {
+            offerToken = subsDetail.get(0).getOfferToken();
+        }
+        return offerToken;
     }
 
     public void consumePurchase() {
