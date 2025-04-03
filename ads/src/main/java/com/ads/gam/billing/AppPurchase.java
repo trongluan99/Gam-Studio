@@ -28,7 +28,6 @@ import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
@@ -327,100 +326,87 @@ public class AppPurchase {
     }
 
     public void verifyPurchased(boolean isCallback) {
-        Log.d(TAG, "isPurchased : " + listSubscriptionId.size());
-        verifyFinish = false;
-        if (listINAPId != null) {
-            billingClient.queryPurchasesAsync(
-                    QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(),
-                    new PurchasesResponseListener() {
-                        public void onQueryPurchasesResponse(
-                                BillingResult billingResult,
-                                List<Purchase> list) {
-                            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
-                                for (Purchase purchase : list) {
-                                    for (QueryProductDetailsParams.Product id : listINAPId) {
-                                        if (purchase.getProducts().contains(id.zza())) {
-                                            Log.d(TAG, "verifyPurchased INAPP: true");
-                                            ownerIdInapps.add(id.zza());
-                                            isPurchase = true;
-                                        }
-                                    }
-                                }
-                                isVerifyINAP = true;
-                                if (isVerifySUBS) {
-                                    if (billingListener != null && isCallback) {
-                                        billingListener.onInitBillingFinished(billingResult.getResponseCode());
-                                        if (handlerTimeout != null && rdTimeout != null) {
-                                            handlerTimeout.removeCallbacks(rdTimeout);
-                                        }
-                                    }
-                                    verifyFinish = true;
-                                }
-                            } else {
-                                isVerifyINAP = true;
-                                if (isVerifySUBS) {
-                                    // chưa mua subs và IAP
-                                    billingListener.onInitBillingFinished(billingResult.getResponseCode());
-                                    if (handlerTimeout != null && rdTimeout != null) {
-                                        handlerTimeout.removeCallbacks(rdTimeout);
-                                    }
-                                    verifyFinish = true;
-                                }
-                            }
-                        }
-                    }
-            );
+        if (billingClient == null || !billingClient.isReady()) {
+            Log.e(TAG, "BillingClient is not ready");
+            return;
         }
 
-        if (listSubscriptionId != null) {
+        verifyFinish = false;
+        ArrayList<String> productIdsINAP = getProductIds(listINAPId);
+        ArrayList<String> productIdsSUBS = getProductIds(listSubscriptionId);
+
+        if (!productIdsINAP.isEmpty()) {
             billingClient.queryPurchasesAsync(
-                    QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(),
-                    new PurchasesResponseListener() {
-                        public void onQueryPurchasesResponse(
-                                BillingResult billingResult,
-                                List<Purchase> list) {
-                            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
-                                for (Purchase purchase : list) {
-                                    for (QueryProductDetailsParams.Product id : listSubscriptionId) {
-                                        if (purchase.getProducts().contains(id.zza())) {
-                                            PurchaseResult purchaseResult = new PurchaseResult(
-                                                    purchase.getPackageName(),
-                                                    purchase.getProducts(),
-                                                    purchase.getPurchaseState(),
-                                                    purchase.isAutoRenewing()
-                                            );
-                                            addOrUpdateOwnerIdSub(purchaseResult, id.zza());
-                                            isPurchase = true;
-                                        }
-                                    }
-                                }
-                                isVerifySUBS = true;
-                                if (isVerifyINAP) {
-                                    if (billingListener != null && isCallback) {
-                                        billingListener.onInitBillingFinished(billingResult.getResponseCode());
-                                        if (handlerTimeout != null && rdTimeout != null) {
-                                            handlerTimeout.removeCallbacks(rdTimeout);
-                                        }
-                                    }
-                                    verifyFinish = true;
-                                }
-                            } else {
-                                isVerifySUBS = true;
-                                if (isVerifyINAP) {
-                                    if (billingListener != null && isCallback) {
-                                        billingListener.onInitBillingFinished(billingResult.getResponseCode());
-                                        if (handlerTimeout != null && rdTimeout != null) {
-                                            handlerTimeout.removeCallbacks(rdTimeout);
-                                        }
-                                        verifyFinish = true;
+                    QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(),
+                    (billingResult, list) -> {
+                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                            for (Purchase purchase : list) {
+                                for (String productId : productIdsINAP) {
+                                    if (purchase.getProducts().contains(productId)) {
+                                        ownerIdInapps.add(productId);
+                                        isPurchase = true;
                                     }
                                 }
                             }
                         }
+                        isVerifyINAP = true;
+                        checkAndFinishCallback(isCallback, billingResult);
                     }
             );
+        } else {
+            isVerifyINAP = true;
+        }
+
+        if (!productIdsSUBS.isEmpty()) {
+            billingClient.queryPurchasesAsync(
+                    QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(),
+                    (billingResult, list) -> {
+                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                            for (Purchase purchase : list) {
+                                for (String productId : productIdsSUBS) {
+                                    if (purchase.getProducts().contains(productId)) {
+                                        PurchaseResult purchaseResult = new PurchaseResult(
+                                                purchase.getPackageName(),
+                                                purchase.getProducts(),
+                                                purchase.getPurchaseState(),
+                                                purchase.isAutoRenewing()
+                                        );
+                                        addOrUpdateOwnerIdSub(purchaseResult, productId);
+                                        isPurchase = true;
+                                    }
+                                }
+                            }
+                        }
+                        isVerifySUBS = true;
+                        checkAndFinishCallback(isCallback, billingResult);
+                    }
+            );
+        } else {
+            isVerifySUBS = true;
         }
     }
+
+
+    private ArrayList<String> getProductIds(ArrayList<QueryProductDetailsParams.Product> productList) {
+        ArrayList<String> productIds = new ArrayList<>();
+        if (productList != null) {
+            for (QueryProductDetailsParams.Product product : productList) {
+                productIds.add(product.zza());
+            }
+        }
+        return productIds;
+    }
+
+    private void checkAndFinishCallback(boolean isCallback, BillingResult billingResult) {
+        if (isVerifyINAP && isVerifySUBS && billingListener != null && isCallback) {
+            billingListener.onInitBillingFinished(billingResult.getResponseCode());
+            if (handlerTimeout != null && rdTimeout != null) {
+                handlerTimeout.removeCallbacks(rdTimeout);
+            }
+            verifyFinish = true;
+        }
+    }
+
 
     public void updatePurchaseStatus() {
         if (listINAPId != null) {
@@ -682,40 +668,44 @@ public class AppPurchase {
     }
 
     public void consumePurchase(String productId) {
+        if (billingClient == null || !billingClient.isReady()) {
+            Log.e(TAG, "BillingClient is not ready");
+            return;
+        }
+
         billingClient.queryPurchasesAsync(BillingClient.ProductType.INAPP, (billingResult, list) -> {
             Purchase pc = null;
-            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                 for (Purchase purchase : list) {
-                    if (purchase.getSkus().contains(productId)) {
+                    if (purchase.getProducts().contains(productId)) {
                         pc = purchase;
                     }
                 }
             }
-            if (pc == null)
+
+            if (pc == null) {
+                Log.e(TAG, "No purchases found to consume.");
                 return;
+            }
+
             try {
                 ConsumeParams consumeParams =
                         ConsumeParams.newBuilder()
                                 .setPurchaseToken(pc.getPurchaseToken())
                                 .build();
 
-                ConsumeResponseListener listener = new ConsumeResponseListener() {
-                    @Override
-                    public void onConsumeResponse(BillingResult billingResult, String purchaseToken) {
-                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                            Log.e(TAG, "onConsumeResponse: OK");
-                            verifyPurchased(false);
-                        }
+                billingClient.consumeAsync(consumeParams, (billingResult1, purchaseToken) -> {
+                    if (billingResult1.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                        Log.e(TAG, "onConsumeResponse: OK");
+                        verifyPurchased(false);
                     }
-                };
-
-                billingClient.consumeAsync(consumeParams, listener);
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-
     }
+
 
     private List<String> getListInappId() {
         List<String> list = new ArrayList<>();
