@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ads.gam.ads.GamAd;
 import com.ads.gam.funtion.AdCallback;
+import com.ads.gam.funtion.AdType;
+import com.google.android.gms.ads.AdValue;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
@@ -18,16 +20,28 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        /*GamAd.getInstance().loadSplashInterstitialAds(this, BuildConfig.ad_interstitial_splash, 25000, 5000, new AdCallback() {
+        GamAd.getInstance().loadSplashInterstitialAds(this, BuildConfig.ad_interstitial_splash, 25000, 5000, new AdCallback() {
             @Override
             public void onNextAction() {
                 super.onNextAction();
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish();
             }
-        });*/
 
-        GamAd.getInstance().loadInterSplashPriority4SameTime(this,
+            @Override
+            public void onAdClicked(String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdClicked(adUnitId, mediationAdapterClassName, adType);
+                Log.d("LuanDev", "onAdClicked: 111");
+            }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                Log.d("LuanDev", "onAdLogRev: 111: " + adValue + " " + adUnitId + " " + mediationAdapterClassName + " " + adType);
+            }
+        });
+
+        /*GamAd.getInstance().loadInterSplashPriority4SameTime(this,
                 BuildConfig.ad_interstitial_splash,
                 BuildConfig.ad_interstitial_splash,
                 BuildConfig.ad_interstitial_splash,
@@ -40,6 +54,18 @@ public class SplashActivity extends AppCompatActivity {
                             @Override
                             public void onNextAction() {
                                 super.onNextAction();
+                            }
+
+                            @Override
+                            public void onAdClicked(String adUnitId, String mediationAdapterClassName, AdType adType) {
+                                super.onAdClicked(adUnitId, mediationAdapterClassName, adType);
+                                Log.d("LuanDev", "onAdClicked: 111");
+                            }
+
+                            @Override
+                            public void onAdImpression() {
+                                super.onAdImpression();
+                                Log.d("LuanDev", "onAdImpression: 111");
                             }
                         });
                     }
@@ -81,6 +107,12 @@ public class SplashActivity extends AppCompatActivity {
                             }
                         });
                     }
-                });
+
+                    @Override
+                    public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                        super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                        Log.d("LuanDev", "onAdLogRev: 111: " + adValue + " " + adUnitId + " " + mediationAdapterClassName + " " + adType);
+                    }
+                });*/
     }
 }

@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Admob {
     private static final String TAG = "GamStudio";
@@ -219,32 +220,26 @@ public class Admob {
             }
             return;
         }
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //check delay show ad splash
-                if (mInterstitialSplash != null) {
-                    onShowSplash((AppCompatActivity) context, adListener);
-                    return;
-                }
-                isTimeDelay = true;
+        new Handler().postDelayed(() -> {
+            //check delay show ad splash
+            if (mInterstitialSplash != null) {
+                onShowSplash((AppCompatActivity) context, adListener);
+                return;
             }
+            isTimeDelay = true;
         }, timeDelay);
 
         if (timeOut > 0) {
             handlerTimeout = new Handler();
-            rdTimeout = new Runnable() {
-                @Override
-                public void run() {
-                    isTimeout = true;
-                    if (mInterstitialSplash != null) {
-                        onShowSplash((AppCompatActivity) context, adListener);
-                        return;
-                    }
-                    if (adListener != null) {
-                        adListener.onNextAction();
-                        isShowLoadingSplash = false;
-                    }
+            rdTimeout = () -> {
+                isTimeout = true;
+                if (mInterstitialSplash != null) {
+                    onShowSplash((AppCompatActivity) context, adListener);
+                    return;
+                }
+                if (adListener != null) {
+                    adListener.onNextAction();
+                    isShowLoadingSplash = false;
                 }
             };
             handlerTimeout.postDelayed(rdTimeout, timeOut);
@@ -304,9 +299,21 @@ public class Admob {
             }
             return;
         }
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        new Handler().postDelayed(() -> {
+            if (mInterstitialSplash != null) {
+                if (showSplashIfReady)
+                    onShowSplash((AppCompatActivity) context, adListener);
+                else
+                    adListener.onAdSplashReady();
+                return;
+            }
+            isTimeDelay = true;
+        }, timeDelay);
+
+        if (timeOut > 0) {
+            handlerTimeout = new Handler();
+            rdTimeout = () -> {
+                isTimeout = true;
                 if (mInterstitialSplash != null) {
                     if (showSplashIfReady)
                         onShowSplash((AppCompatActivity) context, adListener);
@@ -314,27 +321,9 @@ public class Admob {
                         adListener.onAdSplashReady();
                     return;
                 }
-                isTimeDelay = true;
-            }
-        }, timeDelay);
-
-        if (timeOut > 0) {
-            handlerTimeout = new Handler();
-            rdTimeout = new Runnable() {
-                @Override
-                public void run() {
-                    isTimeout = true;
-                    if (mInterstitialSplash != null) {
-                        if (showSplashIfReady)
-                            onShowSplash((AppCompatActivity) context, adListener);
-                        else
-                            adListener.onAdSplashReady();
-                        return;
-                    }
-                    if (adListener != null) {
-                        adListener.onNextAction();
-                        isShowLoadingSplash = false;
-                    }
+                if (adListener != null) {
+                    adListener.onNextAction();
+                    isShowLoadingSplash = false;
                 }
             };
             handlerTimeout.postDelayed(rdTimeout, timeOut);
@@ -380,6 +369,12 @@ public class Admob {
                     adListener.onAdFailedToLoad(i);
                 }
             }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+            }
         });
 
     }
@@ -400,6 +395,10 @@ public class Admob {
                             .getMediationAdapterClassName(), AdType.INTERSTITIAL);
             if (tokenAdjust != null) {
                 GamLogEventManager.logPaidAdjustWithToken(adValue, mInterstitialSplash.getAdUnitId(), tokenAdjust);
+            }
+
+            if (adListener != null) {
+                adListener.onAdLogRev(adValue, mInterstitialSplash.getAdUnitId(), mInterstitialSplash.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
             }
         });
 
@@ -457,6 +456,9 @@ public class Admob {
                 if (disableAdResumeWhenClickAds)
                     AppOpenManager.getInstance().disableAdResumeByClickAction();
                 GamLogEventManager.logClickAdsEvent(context, mInterstitialSplash.getAdUnitId());
+                adListener.onAdClicked();
+
+                adListener.onAdClicked(mInterstitialSplash.getAdUnitId(), mInterstitialSplash.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
             }
 
             @Override
@@ -465,6 +467,7 @@ public class Admob {
                 if (adListener != null) {
                     adListener.onAdImpression();
                 }
+                adListener.onAdImpression();
             }
         });
 
@@ -537,6 +540,10 @@ public class Admob {
             if (tokenAdjust != null) {
                 GamLogEventManager.logPaidAdjustWithToken(adValue, mInterstitialSplash.getAdUnitId(), tokenAdjust);
             }
+
+            if (adListener != null) {
+                adListener.onAdLogRev(adValue, mInterstitialSplash.getAdUnitId(), mInterstitialSplash.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
+            }
         });
 
         if (handlerTimeout != null && rdTimeout != null) {
@@ -593,6 +600,10 @@ public class Admob {
                 if (disableAdResumeWhenClickAds)
                     AppOpenManager.getInstance().disableAdResumeByClickAction();
                 GamLogEventManager.logClickAdsEvent(context, mInterstitialSplash.getAdUnitId());
+
+                adListener.onAdClicked();
+
+                adListener.onAdClicked(mInterstitialSplash.getAdUnitId(), mInterstitialSplash.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
             }
 
             @Override
@@ -601,6 +612,8 @@ public class Admob {
                 if (adListener != null) {
                     adListener.onAdImpression();
                 }
+
+                adListener.onAdImpression();
             }
         });
 
@@ -686,6 +699,7 @@ public class Admob {
                             if (tokenAdjust != null) {
                                 GamLogEventManager.logPaidAdjustWithToken(adValue, interstitialAd.getAdUnitId(), tokenAdjust);
                             }
+                            adCallback.onAdLogRev(adValue, interstitialAd.getAdUnitId(), interstitialAd.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                         });
                     }
 
@@ -776,6 +790,16 @@ public class Admob {
                     callback.onAdClicked();
                 }
                 GamLogEventManager.logClickAdsEvent(context, mInterstitialAd.getAdUnitId());
+
+                callback.onAdClicked(mInterstitialAd.getAdUnitId(), mInterstitialAd.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
+            }
+
+            @Override
+            public void onAdImpression() {
+                super.onAdImpression();
+                if (callback != null) {
+                    callback.onAdImpression();
+                }
             }
         });
 
@@ -989,6 +1013,10 @@ public class Admob {
                             if (tokenAdjust != null) {
                                 GamLogEventManager.logPaidAdjustWithToken(adValue, adView.getAdUnitId(), tokenAdjust);
                             }
+
+                            if (callback != null) {
+                                callback.onAdLogRev(adValue, adView.getAdUnitId(), adView.getResponseInfo().getMediationAdapterClassName(), AdType.BANNER);
+                            }
                         });
                     }
 
@@ -1007,6 +1035,10 @@ public class Admob {
                         Log.d(TAG, "onAdClicked");
                     }
                     GamLogEventManager.logClickAdsEvent(context, id);
+
+                    if (callback != null) {
+                        callback.onAdClicked(id, adView.getResponseInfo().getMediationAdapterClassName(), AdType.BANNER);
+                    }
                 }
 
                 @Override
@@ -1072,6 +1104,10 @@ public class Admob {
                         if (tokenAdjust != null) {
                             GamLogEventManager.logPaidAdjustWithToken(adValue, adView.getAdUnitId(), tokenAdjust);
                         }
+
+                        if (callback != null) {
+                            callback.onAdLogRev(adValue, adView.getAdUnitId(), adView.getResponseInfo().getMediationAdapterClassName(), AdType.BANNER);
+                        }
                     });
                     if (callback != null) {
                         callback.onAdLoaded();
@@ -1086,6 +1122,18 @@ public class Admob {
                     GamLogEventManager.logClickAdsEvent(context, id);
                     if (callback != null) {
                         callback.onAdClicked();
+                    }
+
+                    if (callback != null) {
+                        callback.onAdClicked(id, adView.getResponseInfo().getMediationAdapterClassName(), AdType.BANNER);
+                    }
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    if (callback != null) {
+                        callback.onAdImpression();
                     }
                 }
             });
@@ -1142,6 +1190,10 @@ public class Admob {
                         if (tokenAdjust != null) {
                             GamLogEventManager.logPaidAdjustWithToken(adValue, adView.getAdUnitId(), tokenAdjust);
                         }
+
+                        if (callback != null) {
+                            callback.onAdLogRev(adValue, adView.getAdUnitId(), adView.getResponseInfo().getMediationAdapterClassName(), AdType.BANNER);
+                        }
                     });
                     if (callback != null) {
                         callback.onAdLoaded();
@@ -1156,6 +1208,18 @@ public class Admob {
                     GamLogEventManager.logClickAdsEvent(context, id);
                     if (callback != null) {
                         callback.onAdClicked();
+                    }
+
+                    if (callback != null) {
+                        callback.onAdClicked(id, adView.getResponseInfo().getMediationAdapterClassName(), AdType.BANNER);
+                    }
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    if (callback != null) {
+                        callback.onAdImpression();
                     }
                 }
             });
@@ -1219,31 +1283,32 @@ public class Admob {
         return builder.build();
     }
 
-    public void loadNative(final Activity mActivity, String id) {
+    public void loadNative(final Activity mActivity, String id, AdCallback adCallback) {
         final FrameLayout frameLayout = mActivity.findViewById(R.id.fl_adplaceholder);
         final ShimmerFrameLayout containerShimmer = mActivity.findViewById(R.id.shimmer_container_native);
-        loadNative(mActivity, containerShimmer, frameLayout, id, R.layout.custom_native_admob_free_size);
+        loadNative(mActivity, containerShimmer, frameLayout, id, R.layout.custom_native_admob_free_size, adCallback);
     }
 
-    public void loadNativeFragment(final Activity mActivity, String id, View parent) {
+    public void loadNativeFragment(final Activity mActivity, String id, View parent, AdCallback adCallback) {
         final FrameLayout frameLayout = parent.findViewById(R.id.fl_adplaceholder);
         final ShimmerFrameLayout containerShimmer = parent.findViewById(R.id.shimmer_container_native);
-        loadNative(mActivity, containerShimmer, frameLayout, id, R.layout.custom_native_admob_free_size);
+        loadNative(mActivity, containerShimmer, frameLayout, id, R.layout.custom_native_admob_free_size, adCallback);
     }
 
-    public void loadSmallNative(final Activity mActivity, String adUnitId) {
+    public void loadSmallNative(final Activity mActivity, String adUnitId, AdCallback adCallback) {
         final FrameLayout frameLayout = mActivity.findViewById(R.id.fl_adplaceholder);
         final ShimmerFrameLayout containerShimmer = mActivity.findViewById(R.id.shimmer_container_native);
-        loadNative(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_admob_medium);
+        loadNative(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_admob_medium, adCallback);
     }
 
-    public void loadSmallNativeFragment(final Activity mActivity, String adUnitId, View parent) {
+    public void loadSmallNativeFragment(final Activity mActivity, String adUnitId, View parent, AdCallback adCallback) {
         final FrameLayout frameLayout = parent.findViewById(R.id.fl_adplaceholder);
         final ShimmerFrameLayout containerShimmer = parent.findViewById(R.id.shimmer_container_native);
-        loadNative(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_admob_medium);
+        loadNative(mActivity, containerShimmer, frameLayout, adUnitId, R.layout.custom_native_admob_medium, adCallback);
     }
 
     public void loadNativeAd(Context context, String id, final AdCallback callback) {
+        AtomicReference<NativeAd> nativeAd1 = new AtomicReference<>();
         if (AppPurchase.getInstance().isPurchased(context)) {
             return;
         }
@@ -1265,7 +1330,12 @@ public class Admob {
                         if (tokenAdjust != null) {
                             GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
                         }
+
+                        if (callback != null) {
+                            callback.onAdLogRev(adValue, id, nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
                     });
+                    nativeAd1.set(nativeAd);
                 })
                 .withAdListener(new AdListener() {
                     @Override
@@ -1290,6 +1360,10 @@ public class Admob {
                             callback.onAdClicked();
                         }
                         GamLogEventManager.logClickAdsEvent(context, id);
+
+                        if (callback != null) {
+                            callback.onAdClicked(id, nativeAd1.get().getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
                     }
                 })
                 .withNativeAdOptions(adOptions)
@@ -1298,6 +1372,7 @@ public class Admob {
     }
 
     public void loadNativeAds(Context context, String id, final AdCallback callback, int countAd) {
+        AtomicReference<NativeAd> nativeAd1 = new AtomicReference<>();
         if (AppPurchase.getInstance().isPurchased(context)) {
             callback.onAdClosed();
             return;
@@ -1310,21 +1385,23 @@ public class Admob {
                 .setVideoOptions(videoOptions)
                 .build();
         AdLoader adLoader = new AdLoader.Builder(context, id)
-                .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
+                .forNativeAd(nativeAd -> {
+                    callback.onUnifiedNativeAdLoaded(nativeAd);
+                    nativeAd.setOnPaidEventListener(adValue -> {
+                        GamLogEventManager.logPaidAdImpression(context,
+                                adValue,
+                                id,
+                                nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        if (tokenAdjust != null) {
+                            GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
+                        }
 
-                    @Override
-                    public void onNativeAdLoaded(@NonNull NativeAd nativeAd) {
-                        callback.onUnifiedNativeAdLoaded(nativeAd);
-                        nativeAd.setOnPaidEventListener(adValue -> {
-                            GamLogEventManager.logPaidAdImpression(context,
-                                    adValue,
-                                    id,
-                                    nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
-                            if (tokenAdjust != null) {
-                                GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
-                            }
-                        });
-                    }
+                        if (callback != null) {
+                            callback.onAdLogRev(adValue, id, nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
+
+                        nativeAd1.set(nativeAd);
+                    });
                 })
                 .withAdListener(new AdListener() {
                     @Override
@@ -1341,6 +1418,18 @@ public class Admob {
                             callback.onAdClicked();
                         }
                         GamLogEventManager.logClickAdsEvent(context, id);
+
+                        if (callback != null) {
+                            callback.onAdClicked(id, nativeAd1.get().getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        super.onAdImpression();
+                        if (callback != null) {
+                            callback.onAdImpression();
+                        }
                     }
                 })
                 .withNativeAdOptions(adOptions)
@@ -1348,74 +1437,8 @@ public class Admob {
         adLoader.loadAds(getAdRequest(), countAd);
     }
 
-    private void loadNative(final Context context, final ShimmerFrameLayout containerShimmer, final FrameLayout frameLayout, final String id, final int layout) {
-        if (AppPurchase.getInstance().isPurchased(context)) {
-            containerShimmer.setVisibility(View.GONE);
-            return;
-        }
-        frameLayout.removeAllViews();
-        frameLayout.setVisibility(View.GONE);
-        containerShimmer.setVisibility(View.VISIBLE);
-        containerShimmer.startShimmer();
-
-        VideoOptions videoOptions = new VideoOptions.Builder()
-                .setStartMuted(true)
-                .build();
-
-        NativeAdOptions adOptions = new NativeAdOptions.Builder()
-                .setVideoOptions(videoOptions)
-                .build();
-
-
-        AdLoader adLoader = new AdLoader.Builder(context, id)
-                .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
-
-                    @Override
-                    public void onNativeAdLoaded(@NonNull NativeAd nativeAd) {
-                        containerShimmer.stopShimmer();
-                        containerShimmer.setVisibility(View.GONE);
-                        frameLayout.setVisibility(View.VISIBLE);
-                        @SuppressLint("InflateParams") NativeAdView adView = (NativeAdView) LayoutInflater.from(context)
-                                .inflate(layout, null);
-                        nativeAd.setOnPaidEventListener(adValue -> {
-                            GamLogEventManager.logPaidAdImpression(context,
-                                    adValue,
-                                    id,
-                                    nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
-                            if (tokenAdjust != null) {
-                                GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
-                            }
-                        });
-                        populateUnifiedNativeAdView(nativeAd, adView);
-                        frameLayout.removeAllViews();
-                        frameLayout.addView(adView);
-                    }
-
-
-                })
-                .withAdListener(new AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError error) {
-                        containerShimmer.stopShimmer();
-                        containerShimmer.setVisibility(View.GONE);
-                        frameLayout.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onAdClicked() {
-                        super.onAdClicked();
-                        if (disableAdResumeWhenClickAds)
-                            AppOpenManager.getInstance().disableAdResumeByClickAction();
-                        GamLogEventManager.logClickAdsEvent(context, id);
-                    }
-                })
-                .withNativeAdOptions(adOptions)
-                .build();
-
-        adLoader.loadAd(getAdRequest());
-    }
-
     private void loadNative(final Context context, final ShimmerFrameLayout containerShimmer, final FrameLayout frameLayout, final String id, final int layout, final AdCallback callback) {
+        AtomicReference<NativeAd> nativeAd1 = new AtomicReference<>();
         if (AppPurchase.getInstance().isPurchased(context)) {
             containerShimmer.setVisibility(View.GONE);
             return;
@@ -1435,29 +1458,30 @@ public class Admob {
 
 
         AdLoader adLoader = new AdLoader.Builder(context, id)
-                .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
+                .forNativeAd(nativeAd -> {
+                    containerShimmer.stopShimmer();
+                    containerShimmer.setVisibility(View.GONE);
+                    frameLayout.setVisibility(View.VISIBLE);
+                    @SuppressLint("InflateParams") NativeAdView adView = (NativeAdView) LayoutInflater.from(context)
+                            .inflate(layout, null);
+                    nativeAd.setOnPaidEventListener(adValue -> {
+                        GamLogEventManager.logPaidAdImpression(context,
+                                adValue,
+                                id,
+                                nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        if (tokenAdjust != null) {
+                            GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
+                        }
 
-                    @Override
-                    public void onNativeAdLoaded(@NonNull NativeAd nativeAd) {
-                        containerShimmer.stopShimmer();
-                        containerShimmer.setVisibility(View.GONE);
-                        frameLayout.setVisibility(View.VISIBLE);
-                        @SuppressLint("InflateParams") NativeAdView adView = (NativeAdView) LayoutInflater.from(context)
-                                .inflate(layout, null);
-                        nativeAd.setOnPaidEventListener(adValue -> {
-                            GamLogEventManager.logPaidAdImpression(context,
-                                    adValue,
-                                    id,
-                                    nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
-                            if (tokenAdjust != null) {
-                                GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
-                            }
-                        });
-                        populateUnifiedNativeAdView(nativeAd, adView);
-                        frameLayout.removeAllViews();
-                        frameLayout.addView(adView);
-                    }
+                        if (callback != null) {
+                            callback.onAdLogRev(adValue, id, nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
 
+                        nativeAd1.set(nativeAd);
+                    });
+                    populateUnifiedNativeAdView(nativeAd, adView);
+                    frameLayout.removeAllViews();
+                    frameLayout.addView(adView);
                 })
                 .withAdListener(new AdListener() {
                     @Override
@@ -1466,7 +1490,6 @@ public class Admob {
                         containerShimmer.setVisibility(View.GONE);
                         frameLayout.setVisibility(View.GONE);
                     }
-
 
                     @Override
                     public void onAdClicked() {
@@ -1477,6 +1500,18 @@ public class Admob {
                             callback.onAdClicked();
                         }
                         GamLogEventManager.logClickAdsEvent(context, id);
+
+                        if (callback != null) {
+                            callback.onAdClicked(id, nativeAd1.get().getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        super.onAdImpression();
+                        if (callback != null) {
+                            callback.onAdImpression();
+                        }
                     }
                 })
                 .withNativeAdOptions(adOptions)
@@ -1487,6 +1522,7 @@ public class Admob {
     }
 
     public void loadNativeAdsFullScreen(Context context, String id, final AdCallback callback) {
+        AtomicReference<NativeAd> nativeAd1 = new AtomicReference<>();
         if (AppPurchase.getInstance().isPurchased(context)) {
             return;
         }
@@ -1499,22 +1535,24 @@ public class Admob {
                         .setVideoOptions(videoOptions)
                         .build();
         AdLoader adLoader = new AdLoader.Builder(context, id)
-                .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
+                .forNativeAd(nativeAd -> {
+                    callback.onUnifiedNativeAdLoaded(nativeAd);
+                    nativeAd.setOnPaidEventListener(adValue -> {
+                        GamLogEventManager.logPaidAdImpression(context,
+                                adValue,
+                                id,
+                                nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
 
-                    @Override
-                    public void onNativeAdLoaded(@NonNull NativeAd nativeAd) {
-                        callback.onUnifiedNativeAdLoaded(nativeAd);
-                        nativeAd.setOnPaidEventListener(adValue -> {
-                            GamLogEventManager.logPaidAdImpression(context,
-                                    adValue,
-                                    id,
-                                    nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        if (tokenAdjust != null) {
+                            GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
+                        }
 
-                            if (tokenAdjust != null) {
-                                GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
-                            }
-                        });
-                    }
+                        if (callback != null) {
+                            callback.onAdLogRev(adValue, id, nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
+
+                        nativeAd1.set(nativeAd);
+                    });
                 })
                 .withAdListener(new AdListener() {
                     @Override
@@ -1531,6 +1569,18 @@ public class Admob {
                             callback.onAdClicked();
                         }
                         GamLogEventManager.logClickAdsEvent(context, id);
+
+                        if (callback != null) {
+                            callback.onAdClicked(id, nativeAd1.get().getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        super.onAdImpression();
+                        if (callback != null) {
+                            callback.onAdImpression();
+                        }
                     }
                 })
                 .withNativeAdOptions(adOptions)
@@ -1540,6 +1590,7 @@ public class Admob {
     }
 
     public void loadNativeAdsFullScreen(final Context context, final ShimmerFrameLayout containerShimmer, final FrameLayout frameLayout, final String id, final int layout, final AdCallback callback) {
+        AtomicReference<NativeAd> nativeAd1 = new AtomicReference<>();
         if (AppPurchase.getInstance().isPurchased(context)) {
             containerShimmer.setVisibility(View.GONE);
             return;
@@ -1575,6 +1626,12 @@ public class Admob {
                         if (tokenAdjust != null) {
                             GamLogEventManager.logPaidAdjustWithToken(adValue, id, tokenAdjust);
                         }
+
+                        if (callback != null) {
+                            callback.onAdLogRev(adValue, id, nativeAd.getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
+
+                        nativeAd1.set(nativeAd);
                     });
                     populateUnifiedNativeAdView(nativeAd, adView);
                     frameLayout.removeAllViews();
@@ -1598,6 +1655,18 @@ public class Admob {
                             callback.onAdClicked();
                         }
                         GamLogEventManager.logClickAdsEvent(context, id);
+
+                        if (callback != null) {
+                            callback.onAdClicked(id, nativeAd1.get().getResponseInfo().getMediationAdapterClassName(), AdType.NATIVE);
+                        }
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        super.onAdImpression();
+                        if (callback != null) {
+                            callback.onAdImpression();
+                        }
                     }
                 })
                 .withNativeAdOptions(adOptions)
@@ -1624,8 +1693,6 @@ public class Admob {
             e.printStackTrace();
         }
 
-        // These assets aren't guaranteed to be in every UnifiedNativeAd, so it's important to
-        // check before trying to display them.
         try {
             if (nativeAd.getBody() == null) {
                 adView.getBodyView().setVisibility(View.INVISIBLE);
@@ -1699,7 +1766,13 @@ public class Admob {
 
     private RewardedAd rewardedAd;
 
-    public void initRewardAds(Context context, String id) {
+    /**
+     * Khởi tạo ads reward
+     *
+     * @param context
+     * @param id
+     */
+    public void initRewardAds(Context context, String id, RewardCallback adCallback) {
         if (AppPurchase.getInstance().isPurchased(context)) {
             return;
         }
@@ -1718,6 +1791,10 @@ public class Admob {
                             , AdType.REWARDED);
                     if (tokenAdjust != null) {
                         GamLogEventManager.logPaidAdjustWithToken(adValue, rewardedAd.getAdUnitId(), tokenAdjust);
+                    }
+
+                    if (adCallback != null) {
+                        adCallback.onAdLogRev(adValue, rewardedAd.getAdUnitId(), Admob.this.rewardedAd.getResponseInfo().getMediationAdapterClassName(), AdType.REWARDED);
                     }
                 });
             }
@@ -1750,6 +1827,10 @@ public class Admob {
                             , AdType.REWARDED);
                     if (tokenAdjust != null) {
                         GamLogEventManager.logPaidAdjustWithToken(adValue, rewardedAd.getAdUnitId(), tokenAdjust);
+                    }
+
+                    if (callback != null) {
+                        callback.onAdLogRev(adValue, rewardedAd.getAdUnitId(), Admob.this.rewardedAd.getResponseInfo().getMediationAdapterClassName(), AdType.REWARDED);
                     }
                 });
 
@@ -1784,6 +1865,9 @@ public class Admob {
                     if (tokenAdjust != null) {
                         GamLogEventManager.logPaidAdjustWithToken(adValue, rewardedAd.getAdUnitId(), tokenAdjust);
                     }
+                    if (callback != null) {
+                        callback.onAdLogRev(adValue, rewardedAd.getAdUnitId(), rewardedAd.getResponseInfo().getMediationAdapterClassName(), AdType.REWARDED);
+                    }
                 });
             }
 
@@ -1804,10 +1888,8 @@ public class Admob {
             return;
         }
         if (rewardedAd == null) {
-            initRewardAds(context, nativeId);
-
+            initRewardAds(context, nativeId, adCallback);
             adCallback.onRewardedAdFailedToShow(0);
-            return;
         } else {
             Admob.this.rewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
@@ -1840,15 +1922,26 @@ public class Admob {
                     if (disableAdResumeWhenClickAds)
                         AppOpenManager.getInstance().disableAdResumeByClickAction();
                     GamLogEventManager.logClickAdsEvent(context, rewardedAd.getAdUnitId());
+                    if (adCallback != null) {
+                        adCallback.onAdClicked();
+                    }
+
+                    if (adCallback != null) {
+                        adCallback.onAdClicked(rewardedAd.getAdUnitId(), rewardedAd.getResponseInfo().getMediationAdapterClassName(), AdType.REWARDED);
+                    }
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    if (adCallback != null) {
+                        adCallback.onAdImpression();
+                    }
                 }
             });
-            rewardedAd.show(context, new OnUserEarnedRewardListener() {
-                @Override
-                public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                    if (adCallback != null) {
-                        adCallback.onUserEarnedReward(rewardItem);
-
-                    }
+            rewardedAd.show(context, rewardItem -> {
+                if (adCallback != null) {
+                    adCallback.onUserEarnedReward(rewardItem);
                 }
             });
         }
@@ -1860,10 +1953,8 @@ public class Admob {
             return;
         }
         if (rewardedInterstitialAd == null) {
-            initRewardAds(activity, nativeId);
-
+            initRewardAds(activity, nativeId, adCallback);
             adCallback.onRewardedAdFailedToShow(0);
-            return;
         } else {
             rewardedInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
@@ -1896,14 +1987,25 @@ public class Admob {
                     GamLogEventManager.logClickAdsEvent(activity, rewardedAd.getAdUnitId());
                     if (disableAdResumeWhenClickAds)
                         AppOpenManager.getInstance().disableAdResumeByClickAction();
+                    if (adCallback != null) {
+                        adCallback.onAdClicked();
+                    }
+                    if (adCallback != null) {
+                        adCallback.onAdClicked(rewardedAd.getAdUnitId(), rewardedAd.getResponseInfo().getMediationAdapterClassName(), AdType.REWARDED);
+                    }
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    if (adCallback != null) {
+                        adCallback.onAdImpression();
+                    }
                 }
             });
-            rewardedInterstitialAd.show(activity, new OnUserEarnedRewardListener() {
-                @Override
-                public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                    if (adCallback != null) {
-                        adCallback.onUserEarnedReward(rewardItem);
-                    }
+            rewardedInterstitialAd.show(activity, rewardItem -> {
+                if (adCallback != null) {
+                    adCallback.onUserEarnedReward(rewardItem);
                 }
             });
         }
@@ -1915,10 +2017,8 @@ public class Admob {
             return;
         }
         if (rewardedAd == null) {
-            initRewardAds(context, nativeId);
-
+            initRewardAds(context, nativeId, adCallback);
             adCallback.onRewardedAdFailedToShow(0);
-            return;
         } else {
             rewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
@@ -1926,7 +2026,6 @@ public class Admob {
                     super.onAdDismissedFullScreenContent();
                     if (adCallback != null)
                         adCallback.onRewardedAdClosed();
-
 
                     AppOpenManager.getInstance().setInterstitialShowing(false);
 
@@ -1944,7 +2043,7 @@ public class Admob {
                     super.onAdShowedFullScreenContent();
 
                     AppOpenManager.getInstance().setInterstitialShowing(true);
-                    initRewardAds(context, nativeId);
+                    initRewardAds(context, nativeId, adCallback);
                 }
 
                 public void onAdClicked() {
@@ -1955,15 +2054,26 @@ public class Admob {
                         adCallback.onAdClicked();
                     }
                     GamLogEventManager.logClickAdsEvent(context, rewardedAd.getAdUnitId());
+
+                    if (adCallback != null) {
+                        adCallback.onAdClicked();
+                    }
+                    if (adCallback != null) {
+                        adCallback.onAdClicked(rewardedAd.getAdUnitId(), rewardedAd.getResponseInfo().getMediationAdapterClassName(), AdType.REWARDED);
+                    }
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    if (adCallback != null) {
+                        adCallback.onAdImpression();
+                    }
                 }
             });
-            rewardedAd.show(context, new OnUserEarnedRewardListener() {
-                @Override
-                public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                    if (adCallback != null) {
-                        adCallback.onUserEarnedReward(rewardItem);
-
-                    }
+            rewardedAd.show(context, rewardItem -> {
+                if (adCallback != null) {
+                    adCallback.onUserEarnedReward(rewardItem);
                 }
             });
         }
@@ -2053,6 +2163,12 @@ public class Admob {
                     isInterHigh1Failed = true;
                 }
             }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+            }
         });
 
         loadInterSplashHigh2(context, idAdsHigh2, timeOut, timeDelay, new AdCallback() {
@@ -2087,6 +2203,12 @@ public class Admob {
                 super.onAdFailedToLoad(i);
                 adListener.onAdPriorityFailedToLoad(i);
             }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+            }
         });
 
         loadInterSplashHigh3(context, idAdsHigh3, timeOut, timeDelay, new AdCallback() {
@@ -2119,6 +2241,12 @@ public class Admob {
                 super.onAdFailedToLoad(i);
                 adListener.onAdPriorityFailedToLoad(i);
             }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+            }
         });
 
         loadInterSplashNormal(context, idAdsNormal, timeOut, timeDelay, new AdCallback() {
@@ -2147,6 +2275,12 @@ public class Admob {
                 super.onAdFailedToLoad(i);
                 adListener.onAdPriorityFailedToLoad(i);
             }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+            }
         });
     }
 
@@ -2166,6 +2300,8 @@ public class Admob {
                 public void onAdClicked() {
                     super.onAdClicked();
                     adListener.onAdClicked();
+
+                    adListener.onAdClicked(mInterSplashHigh1.getAdUnitId(), mInterSplashHigh1.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                 }
 
                 @Override
@@ -2197,6 +2333,7 @@ public class Admob {
                         public void onAdClicked() {
                             super.onAdClicked();
                             adListener.onAdClicked();
+                            adListener.onAdClicked(mInterSplashHigh2.getAdUnitId(), mInterSplashHigh2.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                         }
 
                         @Override
@@ -2222,6 +2359,7 @@ public class Admob {
                                 public void onAdClicked() {
                                     super.onAdClicked();
                                     adListener.onAdClicked();
+                                    adListener.onAdClicked(mInterSplashHigh3.getAdUnitId(), mInterSplashHigh3.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                                 }
 
                                 @Override
@@ -2247,6 +2385,7 @@ public class Admob {
                                         public void onAdClicked() {
                                             super.onAdClicked();
                                             adListener.onAdClicked();
+                                            adListener.onAdClicked(mInterSplashNormal.getAdUnitId(), mInterSplashNormal.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                                         }
 
                                         @Override
@@ -2310,6 +2449,7 @@ public class Admob {
                 public void onAdClicked() {
                     super.onAdClicked();
                     adListener.onAdClicked();
+                    adListener.onAdClicked(mInterSplashHigh2.getAdUnitId(), mInterSplashHigh2.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                 }
 
                 @Override
@@ -2335,6 +2475,7 @@ public class Admob {
                         public void onAdClicked() {
                             super.onAdClicked();
                             adListener.onAdClicked();
+                            adListener.onAdClicked(mInterSplashHigh3.getAdUnitId(), mInterSplashHigh3.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                         }
 
                         @Override
@@ -2360,6 +2501,7 @@ public class Admob {
                                 public void onAdClicked() {
                                     super.onAdClicked();
                                     adListener.onAdClicked();
+                                    adListener.onAdClicked(mInterSplashNormal.getAdUnitId(), mInterSplashNormal.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                                 }
 
                                 @Override
@@ -2413,6 +2555,7 @@ public class Admob {
                 public void onAdClicked() {
                     super.onAdClicked();
                     adListener.onAdClicked();
+                    adListener.onAdClicked(mInterSplashHigh3.getAdUnitId(), mInterSplashHigh3.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                 }
 
                 @Override
@@ -2438,6 +2581,7 @@ public class Admob {
                         public void onAdClicked() {
                             super.onAdClicked();
                             adListener.onAdClicked();
+                            adListener.onAdClicked(mInterSplashNormal.getAdUnitId(), mInterSplashNormal.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                         }
 
                         @Override
@@ -2481,6 +2625,7 @@ public class Admob {
                 public void onAdClicked() {
                     super.onAdClicked();
                     adListener.onAdClicked();
+                    adListener.onAdClicked(mInterSplashNormal.getAdUnitId(), mInterSplashNormal.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                 }
 
                 @Override
@@ -2530,7 +2675,6 @@ public class Admob {
                 } else {
                     adListener.onAdSplashReady();
                 }
-                return;
             }
         }, timeDelay);
 
@@ -2564,18 +2708,15 @@ public class Admob {
                 }
                 if (interstitialAd != null) {
                     mInterSplashHigh1 = interstitialAd;
-                    mInterSplashHigh1.setOnPaidEventListener(new OnPaidEventListener() {
-                        @Override
-                        public void onPaidEvent(@NonNull AdValue adValue) {
-                            GamLogEventManager.logPaidAdImpression(context,
-                                    adValue,
-                                    mInterSplashHigh1.getAdUnitId(),
-                                    mInterSplashHigh1.getResponseInfo()
-                                            .getMediationAdapterClassName(), AdType.INTERSTITIAL);
+                    mInterSplashHigh1.setOnPaidEventListener(adValue -> {
+                        GamLogEventManager.logPaidAdImpression(context,
+                                adValue,
+                                mInterSplashHigh1.getAdUnitId(),
+                                mInterSplashHigh1.getResponseInfo()
+                                        .getMediationAdapterClassName(), AdType.INTERSTITIAL);
 
-                            if (tokenAdjust != null) {
-                                GamLogEventManager.logPaidAdjustWithToken(adValue, mInterSplashHigh1.getAdUnitId(), tokenAdjust);
-                            }
+                        if (tokenAdjust != null) {
+                            GamLogEventManager.logPaidAdjustWithToken(adValue, mInterSplashHigh1.getAdUnitId(), tokenAdjust);
                         }
                     });
 
@@ -2605,6 +2746,12 @@ public class Admob {
                     adListener.onAdFailedToLoad(i);
                 }
             }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+            }
         });
     }
 
@@ -2631,7 +2778,7 @@ public class Admob {
                 AppOpenManager.getInstance().setInterstitialShowing(true);
                 AppOpenManager.getInstance().disableAppResume();
                 isShowLoadingSplash = true;
-                mInterSplashHigh1 = null;
+                /*mInterSplashHigh1 = null;*/
             }
 
             @Override
@@ -2675,6 +2822,7 @@ public class Admob {
                 super.onAdClicked();
                 if (adListener != null) {
                     adListener.onAdClicked();
+                    adListener.onAdClicked(mInterSplashHigh1.getAdUnitId(), mInterSplashHigh1.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                 }
                 if (disableAdResumeWhenClickAds)
                     AppOpenManager.getInstance().disableAdResumeByClickAction();
@@ -2837,6 +2985,12 @@ public class Admob {
                     adListener.onAdFailedToLoad(i);
                 }
             }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+            }
         });
     }
 
@@ -2865,7 +3019,7 @@ public class Admob {
                 AppOpenManager.getInstance().setInterstitialShowing(true);
                 AppOpenManager.getInstance().disableAppResume();
                 isShowLoadingSplash = false;
-                mInterSplashHigh2 = null;
+                /*mInterSplashHigh2 = null;*/
             }
 
             @Override
@@ -2911,6 +3065,7 @@ public class Admob {
                 super.onAdClicked();
                 if (adListener != null) {
                     adListener.onAdClicked();
+                    adListener.onAdClicked(mInterSplashHigh2.getAdUnitId(), mInterSplashHigh2.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                 }
                 if (disableAdResumeWhenClickAds)
                     AppOpenManager.getInstance().disableAdResumeByClickAction();
@@ -3035,18 +3190,15 @@ public class Admob {
                 }
                 if (interstitialAd != null) {
                     mInterSplashHigh3 = interstitialAd;
-                    mInterSplashHigh3.setOnPaidEventListener(new OnPaidEventListener() {
-                        @Override
-                        public void onPaidEvent(@NonNull AdValue adValue) {
-                            GamLogEventManager.logPaidAdImpression(context,
-                                    adValue,
-                                    mInterSplashHigh3.getAdUnitId(),
-                                    mInterSplashHigh3.getResponseInfo()
-                                            .getMediationAdapterClassName(), AdType.INTERSTITIAL);
+                    mInterSplashHigh3.setOnPaidEventListener(adValue -> {
+                        GamLogEventManager.logPaidAdImpression(context,
+                                adValue,
+                                mInterSplashHigh3.getAdUnitId(),
+                                mInterSplashHigh3.getResponseInfo()
+                                        .getMediationAdapterClassName(), AdType.INTERSTITIAL);
 
-                            if (tokenAdjust != null) {
-                                GamLogEventManager.logPaidAdjustWithToken(adValue, mInterSplashHigh3.getAdUnitId(), tokenAdjust);
-                            }
+                        if (tokenAdjust != null) {
+                            GamLogEventManager.logPaidAdjustWithToken(adValue, mInterSplashHigh3.getAdUnitId(), tokenAdjust);
                         }
                     });
 
@@ -3071,6 +3223,12 @@ public class Admob {
                         Log.e(TAG, "loadSplashInterstitialAdsMedium: load fail " + i.getMessage());
                     adListener.onAdFailedToLoad(i);
                 }
+            }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
             }
         });
     }
@@ -3100,7 +3258,7 @@ public class Admob {
                 AppOpenManager.getInstance().setInterstitialShowing(true);
                 AppOpenManager.getInstance().disableAppResume();
                 isShowLoadingSplash = false;
-                mInterSplashHigh3 = null;
+                /*mInterSplashHigh3 = null;*/
             }
 
             @Override
@@ -3146,6 +3304,7 @@ public class Admob {
                 super.onAdClicked();
                 if (adListener != null) {
                     adListener.onAdClicked();
+                    adListener.onAdClicked(mInterSplashHigh3.getAdUnitId(), mInterSplashHigh3.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
                 }
                 if (disableAdResumeWhenClickAds)
                     AppOpenManager.getInstance().disableAdResumeByClickAction();
@@ -3270,18 +3429,15 @@ public class Admob {
                 }
                 if (interstitialAd != null) {
                     mInterSplashNormal = interstitialAd;
-                    mInterSplashNormal.setOnPaidEventListener(new OnPaidEventListener() {
-                        @Override
-                        public void onPaidEvent(@NonNull AdValue adValue) {
-                            GamLogEventManager.logPaidAdImpression(context,
-                                    adValue,
-                                    mInterSplashNormal.getAdUnitId(),
-                                    mInterSplashNormal.getResponseInfo()
-                                            .getMediationAdapterClassName(), AdType.INTERSTITIAL);
+                    mInterSplashNormal.setOnPaidEventListener(adValue -> {
+                        GamLogEventManager.logPaidAdImpression(context,
+                                adValue,
+                                mInterSplashNormal.getAdUnitId(),
+                                mInterSplashNormal.getResponseInfo()
+                                        .getMediationAdapterClassName(), AdType.INTERSTITIAL);
 
-                            if (tokenAdjust != null) {
-                                GamLogEventManager.logPaidAdjustWithToken(adValue, mInterSplashNormal.getAdUnitId(), tokenAdjust);
-                            }
+                        if (tokenAdjust != null) {
+                            GamLogEventManager.logPaidAdjustWithToken(adValue, mInterSplashNormal.getAdUnitId(), tokenAdjust);
                         }
                     });
 
@@ -3307,6 +3463,12 @@ public class Admob {
                     adListener.onAdFailedToLoad(i);
                 }
             }
+
+            @Override
+            public void onAdLogRev(AdValue adValue, String adUnitId, String mediationAdapterClassName, AdType adType) {
+                super.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+                adListener.onAdLogRev(adValue, adUnitId, mediationAdapterClassName, adType);
+            }
         });
     }
 
@@ -3326,6 +3488,10 @@ public class Admob {
                             .getMediationAdapterClassName(), AdType.INTERSTITIAL);
             if (tokenAdjust != null) {
                 GamLogEventManager.logPaidAdjustWithToken(adValue, mInterSplashNormal.getAdUnitId(), tokenAdjust);
+            }
+
+            if (adListener != null) {
+                adListener.onAdLogRev(adValue, mInterSplashNormal.getAdUnitId(), mInterSplashNormal.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
             }
         });
 
@@ -3384,6 +3550,10 @@ public class Admob {
                 if (disableAdResumeWhenClickAds)
                     AppOpenManager.getInstance().disableAdResumeByClickAction();
                 GamLogEventManager.logClickAdsEvent(context, mInterSplashNormal.getAdUnitId());
+                if (adListener != null) {
+                    adListener.onAdClicked();
+                    adListener.onAdClicked(mInterSplashNormal.getAdUnitId(), mInterSplashNormal.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
+                }
             }
 
             @Override
@@ -3454,6 +3624,27 @@ public class Admob {
                         super.onAdClosed();
                         Log.i(TAG, "onAdClosed: ");
                         callback.onAdClosed();
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        super.onAdImpression();
+                        callback.onAdImpression();
+                    }
+
+                    @Override
+                    public void onAdClicked() {
+                        super.onAdClicked();
+                        callback.onAdClicked();
+                        if (mInterSplashHigh1 != null) {
+                            callback.onAdClicked(mInterSplashHigh1.getAdUnitId(), mInterSplashHigh1.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
+                        } else if (mInterSplashHigh2 != null) {
+                            callback.onAdClicked(mInterSplashHigh2.getAdUnitId(), mInterSplashHigh2.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
+                        } else if (mInterSplashHigh3 != null) {
+                            callback.onAdClicked(mInterSplashHigh3.getAdUnitId(), mInterSplashHigh3.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
+                        } else {
+                            callback.onAdClicked(mInterSplashNormal.getAdUnitId(), mInterSplashNormal.getResponseInfo().getMediationAdapterClassName(), AdType.INTERSTITIAL);
+                        }
                     }
 
                     @Override
