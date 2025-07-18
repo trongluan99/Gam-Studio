@@ -49,7 +49,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:22.0.2'
 
     // Mediation
-    implementation 'com.google.ads.mediation:facebook:6.17.0.0'
+    implementation 'com.google.ads.mediation:facebook:6.20.0.0'
     implementation 'com.google.ads.mediation:applovin:12.5.0.0'
     implementation 'com.google.ads.mediation:vungle:7.3.2.0'
     implementation 'com.google.ads.mediation:pangle:6.0.0.3.0'
