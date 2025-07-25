@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustAdRevenue;
-import com.adjust.sdk.AdjustConfig;
 import com.adjust.sdk.AdjustEvent;
 import com.ads.gam.ads.GamAd;
 import com.applovin.mediation.MaxAd;
@@ -50,7 +49,7 @@ public class GamAdjust {
 
     public static void pushTrackEventAdmob(AdValue adValue) {
         if (GamAdjust.enableAdjust) {
-            AdjustAdRevenue adRevenue = new AdjustAdRevenue(AdjustConfig.AD_REVENUE_ADMOB);
+            AdjustAdRevenue adRevenue = new AdjustAdRevenue("admob_sdk");
             adRevenue.setRevenue(adValue.getValueMicros() / 1000000.0, adValue.getCurrencyCode());
 
             Adjust.trackAdRevenue(adRevenue);
@@ -59,7 +58,7 @@ public class GamAdjust {
 
     public static void pushTrackEventApplovin(MaxAd ad, Context context) {
         if (GamAdjust.enableAdjust) {
-            AdjustAdRevenue adjustAdRevenue = new AdjustAdRevenue(AdjustConfig.AD_REVENUE_APPLOVIN_MAX);
+            AdjustAdRevenue adjustAdRevenue = new AdjustAdRevenue("applovin_max_sdk");
             adjustAdRevenue.setRevenue(ad.getRevenue(), "USD");
             adjustAdRevenue.setAdRevenueNetwork(ad.getNetworkName());
             adjustAdRevenue.setAdRevenueUnit(ad.getAdUnitId());
